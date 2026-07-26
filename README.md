@@ -1,11 +1,11 @@
-# Calibration Hazards and Evaluation Artifacts in Decision-Level Multimodal Fusion for Metastasis Prediction in Clear Cell Renal Cell Carcinoma
+# RenoFusion: Calibration Hazards and Evaluation Artifacts in Decision-Level Multimodal Fusion for Metastasis Prediction in Clear Cell Renal Cell Carcinoma
 
 [![Paper PDF](https://img.shields.io/badge/Paper-Elsevier_2--Column_PDF-red.svg)](paper/main.pdf)
 [![Journal](https://img.shields.io/badge/Journal-Journal_of_Biomedical_Informatics-blue.svg)](https://www.sciencedirect.com/journal/journal-of-biomedical-informatics)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Official repository for the research paper: **"Calibration Hazards and Evaluation Artifacts in Decision-Level Multimodal Fusion for Metastasis Prediction in Clear Cell Renal Cell Carcinoma"** by **Ali Hamza** and **Imran Usman** (*National University of Sciences and Technology - NUST, Islamabad, Pakistan*).
+Official repository for the research paper: **"RenoFusion: Calibration Hazards and Evaluation Artifacts in Decision-Level Multimodal Fusion for Metastasis Prediction in Clear Cell Renal Cell Carcinoma"** by **Ali Hamza** and **Imran Usman** (*National University of Sciences and Technology - NUST, Islamabad, Pakistan*).
 
 ---
 
@@ -154,8 +154,8 @@ pdflatex -interaction=nonstopmode main.tex
 If you use this codebase, dataset alignment, or calibration protocol in your research, please cite our paper:
 
 ```bibtex
-@article{hamza2026calibration,
-  title={Calibration Hazards and Evaluation Artifacts in Decision-Level Multimodal Fusion for Metastasis Prediction in Clear Cell Renal Cell Carcinoma},
+@article{hamza2026renofusion,
+  title={RenoFusion: Calibration Hazards and Evaluation Artifacts in Decision-Level Multimodal Fusion for Metastasis Prediction in Clear Cell Renal Cell Carcinoma},
   author={Hamza, Ali and Usman, Imran},
   journal={Journal of Biomedical Informatics},
   year={2026},
