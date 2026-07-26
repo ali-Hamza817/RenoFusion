@@ -1,11 +1,11 @@
-# Calibration Hazards and Evaluation Artifacts in Decision-Level Multimodal Fusion for Renal Cell Carcinoma Metastasis Prediction
+# Calibration Hazards and Evaluation Artifacts in Decision-Level Multimodal Fusion for Metastasis Prediction in Clear Cell Renal Cell Carcinoma
 
 [![Paper PDF](https://img.shields.io/badge/Paper-Elsevier_2--Column_PDF-red.svg)](paper/main.pdf)
 [![Journal](https://img.shields.io/badge/Journal-Journal_of_Biomedical_Informatics-blue.svg)](https://www.sciencedirect.com/journal/journal-of-biomedical-informatics)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Official repository for the research paper: **"Calibration Hazards and Evaluation Artifacts in Decision-Level Multimodal Fusion for Renal Cell Carcinoma Metastasis Prediction"** by **Ali Hamza** and **Imran Usman** (*National University of Sciences and Technology - NUST, Islamabad, Pakistan*).
+Official repository for the research paper: **"Calibration Hazards and Evaluation Artifacts in Decision-Level Multimodal Fusion for Metastasis Prediction in Clear Cell Renal Cell Carcinoma"** by **Ali Hamza** and **Imran Usman** (*National University of Sciences and Technology - NUST, Islamabad, Pakistan*).
 
 ---
 
@@ -59,7 +59,7 @@ Multimodal decision-level fusion integrates clinical, genomic, and radiomic pred
 | **Fusion C (Stacking)** | Uncalibrated | 0.6548 [0.5010--0.7989] | $-0.0489$ | [$-0.1898$, $+0.0916$] | 0.511 | n.s. |
 | | Platt | 0.6420 [0.4912--0.7860] | $-0.0021$ | [$-0.1008$, $+0.0890$] | 0.989 | n.s. |
 | | Isotonic | 0.6888 [0.5581--0.8092] | $-0.0057$ | [$-0.1281$, $+0.1067$] | 0.948 | n.s. |
-| **Fusion D (Cascade Max)** | Uncalibrated | 0.6515 [0.5082--0.7855] | $-0.0522$ & [$-0.2135$, $+0.1222$] | 0.543 | n.s. |
+| **Fusion D (Cascade Max)** | Uncalibrated | 0.6515 [0.5082--0.7855] | $-0.0522$ | [$-0.2135$, $+0.1222$] | 0.543 | n.s. |
 | | Platt | 0.6173 [0.4670--0.7659] | $-0.0267$ | [$-0.1734$, $+0.1145$] | 0.730 | n.s. |
 | | Isotonic | 0.6777 [0.5489--0.8048] | $-0.0167$ | [$-0.1752$, $+0.1495$] | 0.841 | n.s. |
 | **Fusion E (BEF)** | Uncalibrated | 0.7438 [0.6280--0.8503] | $+0.0401$ | [$-0.1044$, $+0.1960$] | 0.585 | n.s. |
@@ -155,7 +155,7 @@ If you use this codebase, dataset alignment, or calibration protocol in your res
 
 ```bibtex
 @article{hamza2026calibration,
-  title={Calibration Hazards and Evaluation Artifacts in Decision-Level Multimodal Fusion for Renal Cell Carcinoma Metastasis Prediction},
+  title={Calibration Hazards and Evaluation Artifacts in Decision-Level Multimodal Fusion for Metastasis Prediction in Clear Cell Renal Cell Carcinoma},
   author={Hamza, Ali and Usman, Imran},
   journal={Journal of Biomedical Informatics},
   year={2026},
