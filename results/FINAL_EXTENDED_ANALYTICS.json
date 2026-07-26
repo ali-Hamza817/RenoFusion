@@ -1,0 +1,88 @@
+{
+  "ECE_MCE": {
+    "M1 Clinical (Uncalibrated)": {
+      "ECE": 0.10307418503196343,
+      "MCE": 0.8954901764331108
+    },
+    "M1 Clinical (Platt)": {
+      "ECE": 0.020314249211897967,
+      "MCE": 0.4142090672245424
+    },
+    "M2 Genomic (Uncalibrated)": {
+      "ECE": 0.09317661193939637,
+      "MCE": 0.498037386516709
+    },
+    "M2 Genomic (Platt)": {
+      "ECE": 0.04127214733748728,
+      "MCE": 0.38753279953669106
+    },
+    "M3 Radiomic (Uncalibrated)": {
+      "ECE": 0.164439470876777,
+      "MCE": 0.6927953362464905
+    },
+    "M3 Radiomic (Platt)": {
+      "ECE": 0.029722323567656465,
+      "MCE": 0.10331251874478825
+    },
+    "Fusion B (Uncalibrated)": {
+      "ECE": 0.06062243714890789,
+      "MCE": 0.6617510460822555
+    },
+    "Fusion B (Platt)": {
+      "ECE": 0.011833658747537487,
+      "MCE": 0.28630833900777763
+    },
+    "Fusion DST (Uncalibrated)": {
+      "ECE": 0.08994728562188431,
+      "MCE": 0.6718103955839028
+    },
+    "Fusion DST (Platt)": {
+      "ECE": 0.08045185284586977,
+      "MCE": 0.16878636763361676
+    }
+  },
+  "DeLong_P_Values": {
+    "Fusion_A": {
+      "z_stat": 0.5232352698860139,
+      "p_value": 0.6008105400791721
+    },
+    "Fusion_B": {
+      "z_stat": 0.534957507607215,
+      "p_value": 0.5926792407637707
+    },
+    "Fusion_DST": {
+      "z_stat": 0.6523040373199066,
+      "p_value": 0.5142050560736209
+    },
+    "Fusion_OT": {
+      "z_stat": 0.6770932388348749,
+      "p_value": 0.49834679843273477
+    }
+  },
+  "Error_Correlation_Pearson": {
+    "M1_Clinical_Err": {
+      "M1_Clinical_Err": 1.0,
+      "M2_Genomic_Err": 0.9787460442032585,
+      "M3_Radiomic_Err": 0.9632338122620169
+    },
+    "M2_Genomic_Err": {
+      "M1_Clinical_Err": 0.9787460442032585,
+      "M2_Genomic_Err": 1.0,
+      "M3_Radiomic_Err": 0.9583138281155974
+    },
+    "M3_Radiomic_Err": {
+      "M1_Clinical_Err": 0.9632338122620169,
+      "M2_Genomic_Err": 0.9583138281155974,
+      "M3_Radiomic_Err": 1.0
+    }
+  },
+  "DST_Conflict_K": {
+    "mean": 0.1677522035725512,
+    "pct_high_conflict": 11.11111111111111
+  },
+  "SMOTE_Ablation": {
+    "M2_No_SMOTE_AUROC": 0.6754115226337448,
+    "DST_With_SMOTE_AUROC": 0.7659465020576132,
+    "DST_No_SMOTE_AUROC": 0.7484567901234568
+  }
+}

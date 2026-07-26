@@ -1,0 +1,87 @@
+\documentclass[a4paper,fleqn]{cas-dc}
+
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage[nameinlink]{cleveref}
+\crefname{table}{Table}{Tables}
+\Crefname{table}{Table}{Tables}
+\usepackage{color}
+\usepackage{xspace}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{float}
+\usepackage{flafter} % Forces figures and tables to appear strictly AFTER their text reference
+\usepackage{placeins}
+\usepackage{afterpage}
+\usepackage{stfloats}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{indentfirst}
+\setlength{\parindent}{1.5em}
+
+% Custom tabularx column types for clean wrapping
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue,
+}
+
+%%% Author definitions
+\def\tsc#1{\csdef{#1}{\textsc{\lowercase{#1}}\xspace}}
+\tsc{WGM}
+\tsc{QE}
+\let\printorcid\relax
+
+\begin{document}
+\let\WriteBookmarks\relax
+\def\floatpagepagefraction{1}
+\def\textpagefraction{.001}
+
+% Short title
+\shorttitle{Calibration Hazards in Multimodal Decision Fusion for ccRCC}
+
+% Main title
+\title [mode = title]{Calibration Hazards and Evaluation Artifacts in Decision-Level Multimodal Fusion for Renal Cell Carcinoma Metastasis Prediction}
+
+% Short author
+\shortauthors{Hamza et al. (2026)}
+
+\author[1]{Ali Hamza}
+\cormark[1]
+\ead{ahamza.msse25mcs@student.nust.edu.pk}
+
+\author[1]{Imran Usman}
+
+\address[1]{National University of Sciences and Technology (NUST), Islamabad, Pakistan}
+
+\cortext[cor1]{Corresponding author}
+
+\begin{abstract}
+Multimodal decision-level fusion integrates clinical, genomic, and radiomic predictors in oncology, yet the sensitivity of information-theoretic fusion rules to base-model miscalibration and class-imbalance rebalancing remains poorly characterized. This study evaluated whether decision-level multimodal fusion improves discrimination for distant metastasis prediction in clear cell renal cell carcinoma (ccRCC), and quantified how probability calibration and Synthetic Minority Over-sampling Technique rebalancing modulate reported fusion performance. Three single-modality base models (clinical zero-shot XGBoost, genomic XGBoost, CT radiomics on ResNet50 deep features) and seven decision-level fusion strategies (simple average, $F_2$-weighted average, stacking, cascade max, Bayesian Evidence Fusion, Dempster--Shafer Theory, Optimal Transport) were benchmarked on $n = 126$ TCGA-KIRC patients (18 M1; 14.29\% prevalence), each scored under three probability regimes with hold-out statistics from 5-fold stratified cross-validation and 2,000 paired bootstrap resamples. M3 CT radiomics achieved the highest single-modality discrimination (AUROC 0.7037 [95\% CI, 0.5622--0.8277]; recall 0.8889; $F_2$ 0.5298). Uncalibrated information-theoretic fusion produced artifactual AUROC gains up to 0.7505 from log-odds stretching of SMOTE-rebalanced probabilities. After 5-fold Platt cross-calibration, all fusion gains dissolved: Platt $F_2$-weighted (primary endpoint) AUROC 0.6631 ($\Delta = +0.0190, p = 0.779$) and Platt Dempster--Shafer AUROC 0.6831 ($\Delta = +0.0391, p = 0.442$) failed to outperform M3. Residual-error correlation ($\rho \in [0.3842, 0.4619]$), Dempster--Shafer evidence conflict ($\bar{K} = 0.4381$, 54.8\% high-conflict patients), and SMOTE ablation (+0.0438 artifactual AUROC boost) confirmed the mechanistic origin. Within this alignment-constrained cohort, CT radiomics is the strongest distant-metastasis signal and decision-level fusion yields no statistically significant incremental discrimination. 5-fold cross-validated Platt scaling of base-model out-of-fold probabilities must precede fusion to prevent artifactual performance reporting.
+\end{abstract}
+
+\begin{keywords}
+Multimodal Machine Learning \sep Decision-Level Fusion \sep Probability Calibration \sep Clear Cell Renal Cell Carcinoma \sep Distant Metastasis Prediction \sep Dempster--Shafer Theory \sep Synthetic Minority Over-sampling Technique (SMOTE) \sep Radiomics \sep Risk Stratification \sep Biomedical AI \sep Evidence Fusion
+\end{keywords}
+
+\maketitle
+
+\input{sections/01_introduction.tex}
+\input{sections/02_literature_review.tex}
+\input{sections/03_methodology.tex}
+\input{sections/04_results.tex}
+\input{sections/05_discussion.tex}
+\input{sections/06_limitations_future_conclusion.tex}
+
+\bibliographystyle{unsrtnat}
+\bibliography{references}
+
+\end{document}

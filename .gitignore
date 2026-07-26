@@ -1,5 +1,10 @@
-# Datasets are too large for GitHub
+# Datasets and large raw image caches
 datasets/
+nnUNet_raw/
+nnUNet_preprocessed/
+nnUNet_results/
+base_papers/
+validation_cases/
 
 # Python cache
 __pycache__/
@@ -23,8 +28,19 @@ venv/
 ehthumbs.db
 Thumbs.db
 
-# Scraped HTML containing public keys
-base_papers/
+# Logs and temporary executables
+logs/*.log
 cloudflared-linux-amd64
-test_*.py
-validation_cases/
+
+# LaTeX temporary compilation files (keep paper/main.pdf and paper/figures)
+paper/*.aux
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/*.toc
+paper/*.nav
+paper/*.snm
+paper/*.bbl
+paper/*.fls
+paper/*.fdb_latexmk
+paper/*.synctex.gz
