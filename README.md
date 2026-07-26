@@ -115,8 +115,8 @@ Multimodal decision-level fusion integrates clinical, genomic, and radiomic pred
 
 ```bash
 # Clone repository
-git clone https://github.com/ali-Hamza817/RenoFusion-ccRCC-multimodal-calibration-fusion.git
-cd RenoFusion-ccRCC-multimodal-calibration-fusion
+git clone https://github.com/ali-Hamza817/RenoFusion.git
+cd RenoFusion
 
 # Install required Python dependencies
 pip install numpy pandas scikit-learn xgboost matplotlib seaborn scipy shap
@@ -159,7 +159,7 @@ If you use this codebase, dataset alignment, or calibration protocol in your res
   author={Hamza, Ali and Usman, Imran},
   journal={Journal of Biomedical Informatics},
   year={2026},
-  url={https://github.com/ali-Hamza817/RenoFusion-ccRCC-multimodal-calibration-fusion},
+  url={https://github.com/ali-Hamza817/RenoFusion},
   publisher={Elsevier}
 }
 ```
