@@ -1,0 +1,132 @@
+{
+  "benchmark_summary": [
+    {
+      "Architecture_Regime": "Naive_RAG",
+      "Recall@3": 0.42033333333333334,
+      "MRR": 1.0,
+      "NDCG@3": 0.7678599014598567,
+      "Faithfulness": 0.7862222222222223,
+      "RAGAS_Composite": 0.8571013085690167,
+      "ECE": 0.06292631620491576,
+      "MCE": 0.06485057506365677,
+      "Brier_Score": 0.2417090766068093
+    },
+    {
+      "Architecture_Regime": "Multimodal_Uncalibrated_MinMax",
+      "Recall@3": 0.4298888888888889,
+      "MRR": 1.0,
+      "NDCG@3": 0.7957168297261357,
+      "Faithfulness": 0.7996666666666667,
+      "RAGAS_Composite": 0.863894470240608,
+      "ECE": 0.08363172141449274,
+      "MCE": 0.1249154352921199,
+      "Brier_Score": 0.24153339152823905
+    },
+    {
+      "Architecture_Regime": "Multimodal_Uncalibrated_RRF",
+      "Recall@3": 0.47311111111111115,
+      "MRR": 1.0,
+      "NDCG@3": 0.8465182556159123,
+      "Faithfulness": 0.8400000000000001,
+      "RAGAS_Composite": 0.8884792458139865,
+      "ECE": 0.5718943517411424,
+      "MCE": 0.5718943517411424,
+      "Brier_Score": 0.5626401463865155
+    },
+    {
+      "Architecture_Regime": "Multimodal_Platt_Calibrated",
+      "Recall@3": 0.42488888888888887,
+      "MRR": 1.0,
+      "NDCG@3": 0.7910240424659082,
+      "Faithfulness": 0.796,
+      "RAGAS_Composite": 0.8613801181933305,
+      "ECE": 0.372651426729697,
+      "MCE": 0.372651426729697,
+      "Brier_Score": 0.37336192724337947
+    },
+    {
+      "Architecture_Regime": "Multimodal_Isotonic_Calibrated",
+      "Recall@3": 0.44333333333333336,
+      "MRR": 1.0,
+      "NDCG@3": 0.8138171558450737,
+      "Faithfulness": 0.8118888888888889,
+      "RAGAS_Composite": 0.8716286759532857,
+      "ECE": 0.3708628869967274,
+      "MCE": 0.3708628869967274,
+      "Brier_Score": 0.3706651954394333
+    },
+    {
+      "Architecture_Regime": "Agentic_RAG_Uncalibrated",
+      "Recall@3": 0.4298888888888889,
+      "MRR": 1.0,
+      "NDCG@3": 0.7957168297261357,
+      "Faithfulness": 0.7996666666666667,
+      "RAGAS_Composite": 0.863894470240608,
+      "ECE": 0.08363172141449274,
+      "MCE": 0.1249154352921199,
+      "Brier_Score": 0.24153339152823905
+    },
+    {
+      "Architecture_Regime": "Agentic_RAG_Platt_Calibrated",
+      "Recall@3": 0.42488888888888887,
+      "MRR": 1.0,
+      "NDCG@3": 0.7910240424659082,
+      "Faithfulness": 0.796,
+      "RAGAS_Composite": 0.8613801181933305,
+      "ECE": 0.372651426729697,
+      "MCE": 0.372651426729697,
+      "Brier_Score": 0.37336192724337947
+    }
+  ],
+  "statistical_tests": {
+    "multimodal_shrinkage": {
+      "delta": 0.0025143520472773306,
+      "ci": [
+        0.0,
+        0.005866821443647105
+      ],
+      "p_value": 0.107
+    },
+    "agentic_shrinkage": {
+      "delta": 0.0025143520472773306,
+      "ci": [
+        0.0,
+        0.005866821443647105
+      ],
+      "p_value": 0.107
+    }
+  },
+  "artifact_audits": {
+    "modality_ablation": {
+      "Full_3Modality_Hybrid": 0.42488888888888887,
+      "Ablate_Radiomics": 0.412,
+      "Ablate_BM25": 0.44588888888888895
+    },
+    "rebalancing_ablation": {
+      "Uncalibrated_SMOTE_Boost": 0.0438,
+      "Class_Weighting_Boost": 0.021,
+      "Focal_Loss_Boost": 0.0185,
+      "No_Rebalancing_Baseline": 0.0,
+      "Post_Calibration_Residual": 0.0
+    },
+    "leakage_audit": {
+      "recall@3_train_resubstitution": 0.985,
+      "recall@3_out_of_fold": 0.42488888888888887,
+      "memorization_gap_delta": 0.5601111111111111
+    },
+    "tool_conflict": {
+      "mean_conflict_K": 0.2763333333333334,
+      "high_conflict_proportion": 0.3933333333333333
+    }
+  },
+  "power_analysis": {
+    "powers": {
+      "50": 0.5443291950022568,
+      "100": 0.8438969338072652,
+      "150": 0.9542233797886086,
+      "200": 0.9878815310004352,
+      "500": 0.9999986268052873
+    },
+    "mde_at_150": 0.22874847517668964
+  }
+}
