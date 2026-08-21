@@ -1,6 +1,7 @@
 # RenoFusion: Calibration Hazards and Evaluation Artifacts in Decision-Level Multimodal Fusion for Metastasis Prediction in Clear Cell Renal Cell Carcinoma
 
 [![Paper PDF](https://img.shields.io/badge/Paper-Elsevier_2--Column_PDF-red.svg)](paper/main.pdf)
+[![Overleaf Source](https://img.shields.io/badge/Overleaf-LaTeX_Source_Zip-green.svg)](paper/RenoFusion_LaTeX_Overleaf_Source.zip)
 [![Journal](https://img.shields.io/badge/Journal-Journal_of_Biomedical_Informatics-blue.svg)](https://www.sciencedirect.com/journal/journal-of-biomedical-informatics)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
