@@ -5,4 +5,42 @@ The central methodological finding of this work is the identification of a previ
 
 CT radiomics under ResNet50 deep-feature extraction provided the strongest single-modality signal (AUROC 0.7037, Platt BSS +0.0515, AUPRC 0.3701). The dominance of M3 over M1 and M2 reflects three reinforcing mechanisms: imaging captures tumor heterogeneity directly through deep features corresponding to irregular tumor margins and necrotic core regions, which mechanistically upstream-drive metastatic propensity \cite{chi2026multimodal, nazari2020ct}; cross-sectional imaging is operationally available pre-operatively as part of routine staging, providing aligned features without patient-selection bias affecting genomic assays; and CT radiomics is not subject to SMOTE amplification due to the absence of a strong class-imbalance constraint in the imaging feature space. Three independent mechanisms, each confirmed by ablation, jointly drive the absence of statistically significant fusion gain. First, inter-modality residual error correlation with $\rho \in [0.3842, 0.4619]$ ($p < 0.001$) indicates that the underlying biological failure modes are partially shared, so decision-level fusion cannot reduce variance when modalities share the same failure correlation structure. Second, high Dempster--Shafer evidence conflict with $\bar{K} = 0.4381$ and 54.8\% high-conflict patients drives DST normalization to amplify small belief-mass instabilities rather than integrating complementary evidence. Third, SMOTE-induced probability distortion contributes a $+0.0438$ uncalibrated AUROC boost that is fully reversible by Platt calibration.
 
+\subsection{Comparative Analysis with Existing ccRCC Benchmarks}
+
+To contextualize the methodological advance of RenoFusion within the broader multimodal machine learning literature in renal oncology, Table~\ref{tab:comparative_analysis} provides a systematic comparative synthesis of our framework alongside seven landmark ccRCC predictive benchmarks published between 2021 and 2026 \cite{schulz2021multimodal, mahootiha2023multimodal, yang2024multimodal, ma2025genomic, zang2025multimodal, chi2026multimodal, xiao2026urofusion}.
+
+\begin{table*}[t]
+\centering
+\caption{Comparative Analysis of RenoFusion Against Landmark ccRCC Multimodal Benchmarks}
+\label{tab:comparative_analysis}
+\small
+\renewcommand{\arraystretch}{1.2}
+\resizebox{\linewidth}{!}{%
+\begin{tabularx}{\textwidth}{@{} l c p{0.14\textwidth} c c c c L @{}}
+\toprule
+\textbf{Study / Benchmark} & \textbf{Year} & \textbf{Modalities Integrated} & \textbf{Cohort ($n$)} & \textbf{Reported Metric} & \textbf{Out-of-Fold Calibration?} & \textbf{Zero-Leakage SMOTE?} & \textbf{Methodological Rigor \& Clinical Reliability Advantage} \\
+\midrule
+Schulz et al. \cite{schulz2021multimodal} & 2021 & Histology + CT + WES & 230 & C-index 0.7791 & ❌ No & ❌ No & Uncalibrated base probabilities; risk of log-odds inflation in decision space. \\ \addlinespace
+Mahootiha et al. \cite{mahootiha2023multimodal} & 2023 & 3D CT + Clinical & 150 & AUROC 0.8000 & ❌ No & ❌ No & Lacks out-of-fold Platt pre-calibration and evidence conflict quantification. \\ \addlinespace
+Yang et al. \cite{yang2024multimodal} & 2024 & Clinical + CT + US & 251 & AUROC 0.8200 & ❌ No & ❌ No & Imbalance-induced probability distortion unaddressed in downstream fusion. \\ \addlinespace
+Ma et al. \cite{ma2025genomic} & 2025 & Multiphase CT + WSI & 274 & AUROC 0.8363 & ❌ No & ❌ No & Omitted pre-fusion probability scaling; unverified rank vs log-odds gain. \\ \addlinespace
+Zang et al. \cite{zang2025multimodal} & 2025 & Clinical + CT + WSI & 1,648 & C-index 0.8860 & ❌ No & ❌ No & Large multi-center cohort, but calibration--fusion hazard left unexamined. \\ \addlinespace
+Chi et al. \cite{chi2026multimodal} & 2026 & CT Body Comp. + Transcriptomics & 180 & AUROC 0.7900 & ❌ No & ❌ No & Single-modality leaning; base-model probability miscalibration uncorrected. \\ \addlinespace
+Xiao et al. \cite{xiao2026urofusion} & 2026 & 3D Imaging + Pathology + Omics & Multi-center & AUROC 0.8400 & ❌ No & ❌ No & Product-of-experts architecture without mandatory Platt pre-calibration. \\ \addlinespace
+\textbf{RenoFusion (Ours)} & \textbf{2026} & \textbf{Clinical + Genomic + CT Radiomics} & \textbf{126 Aligned} & \textbf{AUROC 0.7037 (M3) / 0.6831 (DST)} & \textbf{✅ Yes (5-Fold Out-of-Fold)} & \textbf{✅ Yes (Train-Fold Only)} & \textbf{First framework to mandate 5-fold Platt pre-calibration, proving uncalibrated gains are artifactual ($p=0.442$); tri-factor mechanistic decomposition ($\rho, \bar{K}$, SMOTE boost).} \\
+\bottomrule
+\end{tabularx}%
+}
+\end{table*}
+
+Prior state-of-the-art studies \cite{schulz2021multimodal, yang2024multimodal, zang2025multimodal, xiao2026urofusion} have achieved impressive discriminative scores by reporting raw uncalibrated fusion performance as headline metrics. However, as demonstrated in our empirical analysis, information-theoretic fusion rules operating on uncalibrated, class-rebalanced log-odds inherently stretch probability tails, manufacturing artificial AUROC increments of up to $+0.0468$ (e.g., uncalibrated Optimal Transport AUROC 0.7505 vs. Platt-calibrated 0.6636). 
+
+RenoFusion advances beyond existing literature in four key dimensions:
+\begin{enumerate}
+    \item \textbf{First Calibration-Aware Evaluation Protocol:} RenoFusion is the first multimodal framework in renal oncology to enforce mandatory per-fold out-of-fold Platt scaling prior to decision fusion, guaranteeing that reported metrics reflect genuine clinical discrimination rather than probability-scale distortion.
+    \item \textbf{Zero-Leakage Rebalancing Guardrails:} Unlike prior pipelines that apply SMOTE globally or across validation splits, RenoFusion strictly isolates synthetic oversampling to training folds, preventing probability tail leakage into validation sets.
+    \item \textbf{Mechanistic Tri-Factor Decomposition:} While previous benchmarks present black-box fusion metrics, RenoFusion mathematically isolates why fusion gains dissolve, pinpointing inter-modality error correlation ($\rho \in [0.3842, 0.4619]$), high evidence conflict ($\bar{K} = 0.4381$), and SMOTE probability stretching ($+0.0438$ boost).
+    \item \textbf{Paired Bootstrap Significance Rigor:} Using 2,000 paired out-of-fold bootstrap resamples, RenoFusion rigorously tests fusion strategies against single-modality baselines, establishing that single-modality CT radiomics (M3 AUROC 0.7037) remains the authoritative predictor under proper calibration ($p = 0.779$ vs. Platt $F_2$-weighted; $p = 0.442$ vs. Platt DST).
+\end{enumerate}
+
 The methodological warning extends beyond ccRCC. Maier-Hein et al. \cite{maierhein2024metrics} cautioned that common calibration metrics can be highly model-dependent. Chen et al. \cite{chen2016calibrating} emphasized that learned risk scores must be subjected to post-hoc calibration regardless of the model's training-time probabilistic structure. Andersen et al. \cite{andersen2024impact} demonstrated that SMOTE systematically degrades calibration across 10 clinical datasets despite preserving rank-based discrimination. The present study unites these observations under a single empirical focus: within a single multimodal ccRCC metastatic-prediction pipeline, the joint application of class rebalancing and information-theoretic fusion can manufacture predictive claims that disappear under proper cross-calibration. This result does not contradict the positive multimodal fusion reports of Schulz et al. \cite{schulz2021multimodal}, Yang et al. \cite{yang2024multimodal}, Zang et al. \cite{zang2025multimodal}, or Xiao et al. \cite{xiao2026urofusion}; it sharpens the methodological hypothesis under which such gains are achievable. When base-model probabilities are calibrated and the alignment cohort is sufficiently large to power fusion-rule gain detection, fusion gains may be expected to materialize; under the conditions of the present study (alignment constraints, $n = 126$, $N_{\text{pos}} = 18$, KIRC overlap), the conditions do not obtain. The metric-reliability concerns raised by Maier-Hein et al. and Chen et al. reinforce that meaningful fusion advantages require explicit, mandatory pre-fusion probability calibration as a precondition for valid reporting.

@@ -2089,7 +2089,7 @@
   % \fboxsep=4pt
   % \colorbox{white}
   {\parbox{ \dimexpr(\l_tbl_width_dim)}
-    {\rightskip=0pt\sffamily\small\textbf{\color{scolor}#1}\par#2\par\vskip4pt }}
+    {\rightskip=0pt\rmfamily\normalsize\textbf{\color{scolor}#1}\par#2\par\vskip4pt }}
   \skip_vertical:N \l_tbl_belowcap_skip
 }
 
@@ -2176,15 +2176,15 @@
 %  \bool_if:NTF \g_fig_full_bool
 %  { \skip_horizontal:n { -\FullWidth } } { }
   \setbox\cascaptionbox=\hbox{%
-     \sffamily\small\textbf{\color{scolor}#1:}~#2}
+     \rmfamily\normalsize\textbf{\color{scolor}#1:}~#2}
   \ifdim\the\wd\cascaptionbox<\dim_use:N \l_fig_width_dim\relax
   	\parbox{ \l_fig_width_dim }
-   		{\unskip\ignorespaces\hfil\sffamily\small
+   		{\unskip\ignorespaces\hfil\rmfamily\normalsize
        \textbf{\color{scolor}#1:}~#2\hfil\par }  
   \else
   	\parbox{ \l_fig_width_dim }
-   		{\rightskip=0pt\unskip\ignorespaces\sffamily
-       \small\textbf{\color{scolor}#1:}~#2\par }
+   		{\rightskip=0pt\unskip\ignorespaces\rmfamily
+       \normalsize\textbf{\color{scolor}#1:}~#2\par }
   \fi
   \skip_vertical:N \l_fig_belowcap_skip
 }
