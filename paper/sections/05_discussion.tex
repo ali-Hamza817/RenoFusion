@@ -14,23 +14,21 @@ To contextualize the methodological advance of RenoFusion within the broader mul
 \caption{Comparative Analysis of RenoFusion Against Landmark ccRCC Multimodal Benchmarks}
 \label{tab:comparative_analysis}
 \small
-\renewcommand{\arraystretch}{1.2}
-\resizebox{\linewidth}{!}{%
-\begin{tabularx}{\textwidth}{@{} l c p{0.14\textwidth} c c c c L @{}}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{@{} >{\raggedright\arraybackslash}p{0.16\textwidth} c >{\raggedright\arraybackslash}p{0.18\textwidth} c >{\centering\arraybackslash}p{0.14\textwidth} L @{}}
 \toprule
-\textbf{Study / Benchmark} & \textbf{Year} & \textbf{Modalities Integrated} & \textbf{Cohort ($n$)} & \textbf{Reported Metric} & \textbf{Out-of-Fold Calibration?} & \textbf{Zero-Leakage SMOTE?} & \textbf{Methodological Rigor \& Clinical Reliability Advantage} \\
+\textbf{Study / Benchmark} & \textbf{Year} & \textbf{Modalities Integrated} & \textbf{Cohort ($n$)} & \textbf{Reported Metric} & \textbf{Out-of-Fold Calibration \& Methodological Rigor} \\
 \midrule
-Schulz et al. \cite{schulz2021multimodal} & 2021 & Histology + CT + WES & 230 & C-index 0.7791 & ❌ No & ❌ No & Uncalibrated base probabilities; risk of log-odds inflation in decision space. \\ \addlinespace
-Mahootiha et al. \cite{mahootiha2023multimodal} & 2023 & 3D CT + Clinical & 150 & AUROC 0.8000 & ❌ No & ❌ No & Lacks out-of-fold Platt pre-calibration and evidence conflict quantification. \\ \addlinespace
-Yang et al. \cite{yang2024multimodal} & 2024 & Clinical + CT + US & 251 & AUROC 0.8200 & ❌ No & ❌ No & Imbalance-induced probability distortion unaddressed in downstream fusion. \\ \addlinespace
-Ma et al. \cite{ma2025genomic} & 2025 & Multiphase CT + WSI & 274 & AUROC 0.8363 & ❌ No & ❌ No & Omitted pre-fusion probability scaling; unverified rank vs log-odds gain. \\ \addlinespace
-Zang et al. \cite{zang2025multimodal} & 2025 & Clinical + CT + WSI & 1,648 & C-index 0.8860 & ❌ No & ❌ No & Large multi-center cohort, but calibration--fusion hazard left unexamined. \\ \addlinespace
-Chi et al. \cite{chi2026multimodal} & 2026 & CT Body Comp. + Transcriptomics & 180 & AUROC 0.7900 & ❌ No & ❌ No & Single-modality leaning; base-model probability miscalibration uncorrected. \\ \addlinespace
-Xiao et al. \cite{xiao2026urofusion} & 2026 & 3D Imaging + Pathology + Omics & Multi-center & AUROC 0.8400 & ❌ No & ❌ No & Product-of-experts architecture without mandatory Platt pre-calibration. \\ \addlinespace
-\textbf{RenoFusion (Ours)} & \textbf{2026} & \textbf{Clinical + Genomic + CT Radiomics} & \textbf{126 Aligned} & \textbf{AUROC 0.7037 (M3) / 0.6831 (DST)} & \textbf{✅ Yes (5-Fold Out-of-Fold)} & \textbf{✅ Yes (Train-Fold Only)} & \textbf{First framework to mandate 5-fold Platt pre-calibration, proving uncalibrated gains are artifactual ($p=0.442$); tri-factor mechanistic decomposition ($\rho, \bar{K}$, SMOTE boost).} \\
+Schulz et al. \cite{schulz2021multimodal} & 2021 & Histology + CT + WES & 230 & C-index 0.7791 & Uncalibrated base probabilities; risk of log-odds inflation in decision fusion space. \\ \addlinespace[3pt]
+Mahootiha et al. \cite{mahootiha2023multimodal} & 2023 & 3D CT + Clinical & 150 & AUROC 0.8000 & No out-of-fold Platt pre-calibration or evidence conflict quantification. \\ \addlinespace[3pt]
+Yang et al. \cite{yang2024multimodal} & 2024 & Clinical + CT + US & 251 & AUROC 0.8200 & Imbalance-induced probability distortion unaddressed in downstream decision rules. \\ \addlinespace[3pt]
+Ma et al. \cite{ma2025genomic} & 2025 & Multiphase CT + WSI & 274 & AUROC 0.8363 & Pre-fusion probability scaling omitted; unverified rank vs log-odds gain. \\ \addlinespace[3pt]
+Zang et al. \cite{zang2025multimodal} & 2025 & Clinical + CT + WSI & 1,648 & C-index 0.8860 & Multi-center cohort, but calibration--fusion hazard left unexamined. \\ \addlinespace[3pt]
+Chi et al. \cite{chi2026multimodal} & 2026 & CT Body Comp. + Omics & 180 & AUROC 0.7900 & Single-modality leaning; base-model probability miscalibration uncorrected. \\ \addlinespace[3pt]
+Xiao et al. \cite{xiao2026urofusion} & 2026 & 3D CT + Pathology + Omics & Multi-center & AUROC 0.8400 & Product-of-experts architecture without mandatory Platt pre-calibration. \\ \addlinespace[3pt]
+\textbf{RenoFusion (Ours)} & \textbf{2026} & \textbf{Clinical + Genomic + CT} & \textbf{126 Aligned} & \textbf{AUROC 0.7037 / 0.6831} & \textbf{First to mandate 5-fold Platt pre-calibration; proves uncalibrated gains are artifactual ($p=0.442$); zero-leakage SMOTE; tri-factor error/conflict decomposition.} \\
 \bottomrule
-\end{tabularx}%
-}
+\end{tabularx}
 \end{table*}
 
 Prior state-of-the-art studies \cite{schulz2021multimodal, yang2024multimodal, zang2025multimodal, xiao2026urofusion} have achieved impressive discriminative scores by reporting raw uncalibrated fusion performance as headline metrics. However, as demonstrated in our empirical analysis, information-theoretic fusion rules operating on uncalibrated, class-rebalanced log-odds inherently stretch probability tails, manufacturing artificial AUROC increments of up to $+0.0468$ (e.g., uncalibrated Optimal Transport AUROC 0.7505 vs. Platt-calibrated 0.6636). 
