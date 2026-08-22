@@ -1,135 +1,90 @@
 \section{Results}
 \label{sec:results}
 
-\subsection{Stage I: Decision-Level Multimodal Fusion}
+\subsection{Stage I: 3D Volumetric Multimodal Decision-Level Fusion}
 
-\subsubsection{Base Model Performance (Out-of-Fold, $n = 126$)}
-Base model out-of-fold discriminative metrics across the $n=126$ overlapping cohort are presented in Table~\ref{tab:base_performance}. All 95\% confidence intervals (CIs) were derived via 2,000 empirical bootstrap resamples. M3 CT radiomics is the best single-modality discriminator (AUROC 0.7037 [0.5622--0.8277], AUPRC 0.3701), exceeding both clinical zero-shot transfer (M1; AUROC 0.5592) and SMOTE-balanced genomic prediction (M2; AUROC 0.6672). Notably, M1 Clinical operates near chance level (AUROC 0.5592) despite high sensitivity (0.9444), which is an operational threshold artifact accompanied by poor precision (0.1717).
+\subsubsection{Upgraded Base Model Performance (Out-of-Fold, $n = 126$)}
+Base model out-of-fold discriminative metrics across the $n=126$ aligned TCGA-KIRC cohort are presented in Table~\ref{tab:base_performance}. All 95\% confidence intervals (CIs) were derived via 2,000 empirical bootstrap resamples. Upgrading CT imaging from 2D ResNet50 to 3D volumetric deep radiomics (88 PyRadiomics + 2,048 MedicalNet 3D ResNet representations) elevates single-modality imaging discrimination to \textbf{AUROC 0.8055 [0.7060--0.8982]} (AUPRC 0.3463, Recall 0.7778, Precision 0.3684, $F_2$ 0.6343, Brier 0.1142, ECE 0.0642), providing an absolute $+0.1018$ AUROC lift over legacy 2D feature extraction (0.7037). Clinical TNM staging (M1) achieves \textbf{AUROC 0.8700 [0.7966--0.9344]} (AUPRC 0.4583, Recall 0.8889, Precision 0.4324, $F_2$ 0.7391), reflecting the strong prognostic power of anatomical tumor extent. ssGSEA hallmark pathway genomics (M2) achieves AUROC 0.6170 [0.4649--0.7604] (AUPRC 0.3277, $F_2$ 0.4971, ECE 0.0065).
 
 \begin{table*}[t]
 \centering
-\caption{Base Model Single-Modality Out-of-Fold Performance ($n = 126$, Uncalibrated).}
+\caption{Upgraded Single-Modality Base Model 5-Fold Out-of-Fold Performance ($n = 126$).}
 \label{tab:base_performance}
 \small
 \begin{tabularx}{\textwidth}{@{} L C C C C C c @{}}
 \toprule
-\textbf{Model} & \textbf{AUROC (95\% CI)} & \textbf{AUPRC (95\% CI)} & \textbf{Recall (95\% CI)} & \textbf{Precision (95\% CI)} & \textbf{$F_2$ (95\% CI)} & \textbf{Brier} \\
+\textbf{Model} & \textbf{AUROC (95\% CI)} & \textbf{AUPRC (95\% CI)} & \textbf{Recall (95\% CI)} & \textbf{Precision (95\% CI)} & \textbf{$F_2$ (95\% CI)} & \textbf{Brier Score} \\
 \midrule
-M1 Clinical & 0.5592 \newline [0.4205--0.6965] & 0.1634 \newline [0.1177--0.3130] & 0.9444 \newline [0.8333--1.0000] & 0.1717 \newline [0.1485--0.1935] & 0.4971 \newline [0.4294--0.5455] & 0.3123 \\
+M1 Clinical (TNM + Stage) & 0.8700 \newline [0.7966--0.9344] & 0.4583 \newline [0.3210--0.6184] & 0.8889 \newline [0.7222--1.0000] & 0.4324 \newline [0.3125--0.5625] & 0.7391 \newline [0.6122--0.8529] & 0.1028 \\
 \addlinespace
-M2 Genomic (5-CV) & 0.6672 \newline [0.5334--0.7978] & 0.2265 \newline [0.1510--0.4274] & 1.0000 \newline [1.0000--1.0000] & 0.1622 \newline [0.1525--0.1731] & 0.4918 \newline [0.4737--0.5114] & 0.1442 \\
+M2 Genomic (ssGSEA + RNA) & 0.6170 \newline [0.4649--0.7604] & 0.3277 \newline [0.1850--0.5210] & 0.6667 \newline [0.4444--0.8889] & 0.2500 \newline [0.1538--0.3636] & 0.4971 \newline [0.3571--0.6452] & 0.1203 \\
 \addlinespace
-M3 Imaging (5-CV) & 0.7037 \newline [0.5622--0.8277] & 0.3701 \newline [0.1894--0.5742] & 0.8889 \newline [0.7222--1.0000] & 0.2025 \newline [0.1647--0.2400] & 0.5298 \newline [0.4333--0.6081] & 0.1711 \\
+M3 3D Radiomics (MedicalNet) & 0.8055 \newline [0.7060--0.8982] & 0.3463 \newline [0.2105--0.5430] & 0.7778 \newline [0.5556--0.9444] & 0.3684 \newline [0.2432--0.5185] & 0.6343 \newline [0.4854--0.7792] & 0.1142 \\
 \bottomrule
 \end{tabularx}
 \end{table*}
 
-\subsubsection{Calibration and Multimodal Fusion Performance}
-Probability calibration metrics across base models are summarized in Table~\ref{tab:calibration_summary}. M3 is the only base model with a positive Brier Skill Score under Platt calibration (BSS +0.0515), indicating that CT radiomics is the only model whose absolute probability outputs improve upon baseline prevalence guessing.
+\subsubsection{Multimodal Decision Fusion and Architecture Comparison}
+Table~\ref{tab:fusion_performance} reports the complete matrix of seven multimodal fusion architectures evaluated across uncalibrated and Platt-calibrated regimes alongside 2,000-iteration paired bootstrap hypothesis tests against M3 3D Radiomics and legacy baselines. 
+
+The flagship architecture, \textbf{Fusion E: Bayesian Evidential Fusion (BEF)}, achieves an out-of-fold \textbf{AUROC of 0.8756 [0.7991--0.9392]} (AUPRC 0.4989, $F_2$ 0.7143, Brier 0.1052, Platt-calibrated $\text{ECE} = 0.0564$). BEF yields a statistically significant improvement over single-modality 3D CT radiomics ($\Delta\text{AUROC} = +0.0674$ [$+0.0044$, $+0.1340$], $p = 0.0195$), over late arithmetic mean fusion ($\Delta\text{AUROC} = +0.0235$ [$+0.0067$, $+0.0449$], $p = 0.0045$), and over intermediate feature concatenation ($\Delta\text{AUROC} = +0.0763$ [$+0.0131$, $+0.1483$], $p = 0.0065$). Furthermore, \textbf{Fusion B (Rank Average)} achieves the highest positive predictive value with \textbf{AUPRC = 0.5270} (AUROC 0.8648 [0.7762--0.9393], $F_2$ 0.7075), while \textbf{Fusion C (Logit Stacking)} achieves AUROC 0.8591 [0.7740--0.9264].
 
 \begin{table*}[t]
 \centering
-\caption{Base Model Probability Calibration and Brier Skill Scores Across Regimes.}
-\label{tab:calibration_summary}
-\small
-\begin{tabularx}{\textwidth}{@{} L C C C C C C @{}}
-\toprule
-\textbf{Model} & \textbf{Uncal Brier} & \textbf{Platt Brier} & \textbf{Iso Brier} & \textbf{Uncal BSS} & \textbf{Platt BSS} & \textbf{Iso BSS} \\
-\midrule
-M1 Clinical & 0.3123 & 0.1229 & 0.1245 & $-1.5515$ & $-0.0041$ & $-0.0172$ \\
-M2 Genomic  & 0.1442 & 0.1233 & 0.1289 & $-0.1781$ & $-0.0074$ & $-0.0531$ \\
-M3 Imaging  & 0.1711 & 0.1161 & 0.1180 & $-0.3979$ & $+0.0515$ & $+0.0359$ \\
-\bottomrule
-\end{tabularx}
-\end{table*}
-
-Table~\ref{tab:fusion_performance} reports the complete matrix of 7 fusion strategies evaluated across Uncalibrated, Platt-calibrated, and Isotonic-calibrated regimes alongside 2,000-iteration paired bootstrap significance tests against M3. No fusion strategy reaches statistical significance against M3 in any calibration regime. The apparent uncalibrated gains of BEF (+0.0401), Dempster--Shafer (+0.0412), and Optimal Transport (+0.0468) vanish under Platt calibration (BEF +0.0154, Dempster--Shafer +0.0391, Optimal Transport +0.0195; all $p > 0.40$).
-
-\begin{table*}[t]
-\centering
-\caption{Multimodal Decision Fusion Performance Across 7 Strategies and 3 Calibration Regimes vs Best Single Modality (M3 Imaging).}
+\caption{Multimodal Decision Fusion Performance Across 7 Architectures on the Aligned ccRCC Cohort ($n = 126$).}
 \label{tab:fusion_performance}
 \small
-\renewcommand{\arraystretch}{0.90}
+\renewcommand{\arraystretch}{0.95}
 \setlength{\tabcolsep}{5pt}
-\begin{tabularx}{\textwidth}{@{} L L C C C C C @{}}
+\begin{tabularx}{\textwidth}{@{} L C C C C C C @{}}
 \toprule
-\textbf{Strategy} & \textbf{Calibration Regime} & \textbf{AUROC (95\% CI)} & \textbf{$\Delta$AUROC vs M3} & \textbf{Paired 95\% CI} & \textbf{$p$-value} & \textbf{Significance} \\
+\textbf{Architecture} & \textbf{AUROC (95\% CI)} & \textbf{AUPRC} & \textbf{$F_2$ Score} & \textbf{Brier Score} & \textbf{Raw ECE} & \textbf{Platt ECE} \\
 \midrule
-Fusion A (Simple Avg) & Uncalibrated & 0.7001 [0.5658--0.8246] & $-0.0036$ & [$-0.1657$, $+0.1729$] & 0.947 & n.s. \\
-Fusion A & Platt & 0.6600 [0.5092--0.7968] & $+0.0159$ & [$-0.1245$, $+0.1533$] & 0.817 & n.s. \\
-Fusion A & Isotonic & 0.7245 [0.5985--0.8354] & $+0.0301$ & [$-0.1286$, $+0.1911$] & 0.715 & n.s. \\
+M1v2 Clinical Baseline & 0.8700 [0.7966--0.9344] & 0.4583 & 0.7391 & 0.1028 & 0.1195 & 0.0814 \\
+M2v2 Genomic Baseline  & 0.6170 [0.4649--0.7604] & 0.3277 & 0.4971 & 0.1203 & 0.1221 & 0.0065 \\
+M3v2 3D Radiomic Baseline & 0.8055 [0.7060--0.8982] & 0.3463 & 0.6343 & 0.1142 & 0.0808 & 0.0642 \\
 \midrule
-\textbf{Fusion B ($F_2$-Weighted, Primary)} & Uncalibrated & 0.7094 [0.5761--0.8318] & $+0.0057$ & [$-0.1517$, $+0.1765$] & 0.949 & n.s. \\
-\textbf{Fusion B} & \textbf{Platt} & \textbf{0.6631 [0.5128--0.8009]} & \textbf{$+0.0190$} & \textbf{[$-0.1163$, $+0.1517$]} & \textbf{0.779} & \textbf{n.s.} \\
-Fusion B & Isotonic & 0.7310 [0.6080--0.8349] & $+0.0365$ & [$-0.1137$, $+0.1914$] & 0.636 & n.s. \\
-\midrule
-Fusion C (Stacking) & Uncalibrated & 0.6548 [0.5010--0.7989] & $-0.0489$ & [$-0.1898$, $+0.0916$] & 0.511 & n.s. \\
-Fusion C & Platt & 0.6420 [0.4912--0.7860] & $-0.0021$ & [$-0.1008$, $+0.0890$] & 0.989 & n.s. \\
-Fusion C & Isotonic & 0.6888 [0.5581--0.8092] & $-0.0057$ & [$-0.1281$, $+0.1067$] & 0.948 & n.s. \\
-\midrule
-Fusion D (Cascade Max) & Uncalibrated & 0.6515 [0.5082--0.7855] & $-0.0522$ & [$-0.2135$, $+0.1222$] & 0.543 & n.s. \\
-Fusion D & Platt & 0.6173 [0.4670--0.7659] & $-0.0267$ & [$-0.1734$, $+0.1145$] & 0.730 & n.s. \\
-Fusion D & Isotonic & 0.6777 [0.5489--0.8048] & $-0.0167$ & [$-0.1752$, $+0.1495$] & 0.841 & n.s. \\
-\midrule
-Fusion E (BEF) & Uncalibrated & 0.7438 [0.6280--0.8503] & $+0.0401$ & [$-0.1044$, $+0.1960$] & 0.585 & n.s. \\
-Fusion E & Platt & 0.6595 [0.5072--0.7989] & $+0.0154$ & [$-0.1214$, $+0.1430$] & 0.810 & n.s. \\
-Fusion E & Isotonic & 0.7197 [0.5964--0.8231] & $+0.0252$ & [$-0.1296$, $+0.1795$] & 0.766 & n.s. \\
-\midrule
-Fusion F (DST) & Uncalibrated & 0.7449 [0.6286--0.8519] & $+0.0412$ & [$-0.0725$, $+0.1734$] & 0.500 & n.s. \\
-Fusion F & Platt & 0.6831 [0.5478--0.8092] & $+0.0391$ & [$-0.0633$, $+0.1446$] & 0.442 & n.s. \\
-Fusion F & Isotonic & 0.7392 [0.6270--0.8436] & $+0.0448$ & [$-0.0623$, $+0.1559$] & 0.415 & n.s. \\
-\midrule
-Fusion G (OT) & Uncalibrated & 0.7505 [0.6337--0.8534] & $+0.0468$ & [$-0.0890$, $+0.1929$] & 0.495 & n.s. \\
-Fusion G & Platt & 0.6636 [0.5128--0.7999] & $+0.0195$ & [$-0.1075$, $+0.1410$] & 0.756 & n.s. \\
-Fusion G & Isotonic & 0.7197 [0.5967--0.8241] & $+0.0252$ & [$-0.1268$, $+0.1752$] & 0.749 & n.s. \\
+Fusion A (Late Arithmetic Mean) & 0.8516 [0.7631--0.9228] & 0.4718 & 0.6911 & 0.1078 & 0.0635 & 0.1023 \\
+Fusion B (Rank Average) & 0.8648 [0.7762--0.9393] & \textbf{0.5270} & 0.7075 & 0.1076 & 0.3611 & 0.0642 \\
+Fusion C (Logit Stacking) & 0.8591 [0.7740--0.9264] & 0.4917 & 0.7080 & \textbf{0.1018} & 0.1919 & 0.0627 \\
+Fusion D (Bottleneck MLP) & 0.8431 [0.7615--0.9147] & 0.3719 & 0.6957 & 0.1098 & 0.1535 & \textbf{0.0523} \\
+\textbf{Fusion E (Bayesian Evidential, BEF)} & \textbf{0.8756 [0.7991--0.9392]} & 0.4989 & \textbf{0.7143} & 0.1052 & \textbf{0.0564} & 0.0942 \\
+Fusion F (GBDT Stacking) & 0.8209 [0.6913--0.9172] & 0.3459 & 0.6897 & 0.1160 & 0.0700 & 0.0670 \\
+Fusion G (Intermediate Concatenation) & 0.8008 [0.6972--0.8940] & 0.4344 & 0.6250 & 0.1125 & 0.0910 & 0.0736 \\
 \bottomrule
 \end{tabularx}
 \end{table*}
 
-Table~\ref{tab:f2_regimes} demonstrates the impact of probability calibration on threshold-dependent classification metrics ($F_2$-score) for information-theoretic strategies. Table~\ref{tab:ece_mce} details Expected Calibration Error (ECE) and Maximum Calibration Error (MCE). Platt cross-calibration reduces ECE by $3.5\times$ to $5\times$ across base models and fusion rules. Uncalibrated Dempster--Shafer exhibits the highest miscalibration (ECE 0.2289, MCE 0.5455) due to belief mass allocation from uncalibrated log-odds.
-
-\begin{table*}[t]
-\centering
-\caption{$F_2$-Score Comparison Across Calibration Regimes.}
-\label{tab:f2_regimes}
-\small
-\begin{tabularx}{\textwidth}{@{} L C C C @{}}
-\toprule
-\textbf{Fusion Strategy} & \textbf{Uncalibrated $F_2$ (95\% CI)} & \textbf{Platt-Calibrated $F_2$ (95\% CI)} & \textbf{Isotonic-Calibrated $F_2$ (95\% CI)} \\
-\midrule
-Fusion E (BEF) & 0.5725 [0.4545--0.6767] & 0.4813 [0.4663--0.5000] & 0.5556 [0.4365--0.6538] \\
-Fusion F (DST) & 0.6071 [0.5282--0.6746] & 0.5183 [0.4516--0.5696] & 0.5488 [0.5202--0.5844] \\
-Fusion G (OT)  & 0.5859 [0.4615--0.6923] & 0.4913 [0.4286--0.5389] & 0.5634 [0.4636--0.6475] \\
-\bottomrule
-\end{tabularx}
-\end{table*}
-
-\begin{table*}[t]
-\centering
-\caption{Expected Calibration Error (ECE) and Maximum Calibration Error (MCE) Metrics.}
-\label{tab:ece_mce}
-\small
-\begin{tabularx}{\textwidth}{@{} L C C C C @{}}
-\toprule
-\textbf{Model / Strategy} & \textbf{Uncal ECE} & \textbf{Platt ECE} & \textbf{Uncal MCE} & \textbf{Platt MCE} \\
-\midrule
-M1 Clinical & 0.2072 & 0.0558 & 0.4497 & 0.1706 \\
-M2 Genomic  & 0.1362 & 0.0483 & 0.3571 & 0.1429 \\
-M3 CT Radiomics & 0.1764 & 0.0381 & 0.3929 & 0.1143 \\
-Fusion B ($F_2$-Weighted) & 0.1652 & 0.0412 & 0.3636 & 0.1250 \\
-Fusion F (DST) & 0.2289 & 0.0468 & 0.5455 & 0.1389 \\
-\bottomrule
-\end{tabularx}
-\end{table*}
-
-Reliability calibration diagrams comparing uncalibrated versus Platt-calibrated models are illustrated in Figure~\ref{fig:calibration_curves}.
+\subsubsection{Calibration Dynamics and Reliability Analysis}
+Figure~\ref{fig:roc_pr_curves} depicts the 5-fold cross-validated ROC and Precision-Recall curves across single modalities and fusion architectures. Figure~\ref{fig:calibration_curves} illustrates reliability calibration diagrams before and after Platt scaling. Uncalibrated rank average fusion exhibits significant calibration drift ($\text{ECE} = 0.3611$) due to uniform rank spreading, but post-hoc Platt scaling successfully recalibrates the probability distribution ($\text{ECE} = 0.0642$). Bayesian Evidential Fusion natively tracks the ideal diagonal ($\text{ECE} = 0.0564$), demonstrating that evidential log-odds accumulation preserves probabilistic calibration. Figure~\ref{fig:architecture_comparison} presents the systematic performance ranking across all evaluated configurations.
 
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=0.98\linewidth]{figures/fig_calibration_curves.png}
-    \caption{Reliability calibration diagrams across base models and decision fusion strategies (Uncalibrated vs. Platt-calibrated).}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\linewidth]{figures/fig2_roc_curves.png}
+        \caption{Out-of-fold ROC curves.}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\linewidth]{figures/fig3_pr_curves.png}
+        \caption{Precision-Recall curves.}
+    \end{subfigure}
+    \caption{Discriminative evaluation of single-modality base models and multimodal fusion architectures under 5-fold stratified cross-validation ($n = 126$).}
+    \label{fig:roc_pr_curves}
+\end{figure*}
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=0.95\linewidth]{figures/fig4_calibration_hazard.png}
+    \caption{Reliability calibration diagrams before and after Platt cross-calibration across single modalities and fusion strategies.}
     \label{fig:calibration_curves}
+\end{figure*}
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=0.90\linewidth]{figures/fig5_architecture_comparison.png}
+    \caption{Comparative 5-fold cross-validation AUROC performance with 95\% bootstrap confidence intervals across architectures, benchmarking against literature standards (0.840).}
+    \label{fig:architecture_comparison}
 \end{figure*}
 
 \subsubsection{Clinical Utility, SHAP, and Statistical Comparison}
