@@ -1,0 +1,192 @@
+{
+  "benchmark_summary": [
+    {
+      "Architecture_Regime": "Naive_RAG",
+      "Recall@3": "0.4261",
+      "MRR": "0.9667",
+      "NDCG@3": "0.7674",
+      "Faithfulness": "0.5863",
+      "Relevance": "0.6493",
+      "Correctness": "0.7600",
+      "Hallucination_Rate": "0.0000",
+      "RAGAS_Composite": "0.5207",
+      "Avg_Answer_Length": "518",
+      "ECE": "0.0633",
+      "MCE": "0.0638",
+      "Brier_Score": "0.2388"
+    },
+    {
+      "Architecture_Regime": "Multimodal_Uncal_MinMax",
+      "Recall@3": "0.4309",
+      "MRR": "1.0000",
+      "NDCG@3": "0.8012",
+      "Faithfulness": "0.6113",
+      "Relevance": "0.6727",
+      "Correctness": "0.7667",
+      "Hallucination_Rate": "0.0000",
+      "RAGAS_Composite": "0.5639",
+      "Avg_Answer_Length": "519",
+      "ECE": "0.1137",
+      "MCE": "0.4012",
+      "Brier_Score": "0.2435"
+    },
+    {
+      "Architecture_Regime": "Multimodal_Uncal_RRF",
+      "Recall@3": "0.4673",
+      "MRR": "0.9733",
+      "NDCG@3": "0.8151",
+      "Faithfulness": "0.6284",
+      "Relevance": "0.6687",
+      "Correctness": "0.7600",
+      "Hallucination_Rate": "0.0000",
+      "RAGAS_Composite": "0.5616",
+      "Avg_Answer_Length": "512",
+      "ECE": "0.5718",
+      "MCE": "0.5718",
+      "Brier_Score": "0.5625"
+    },
+    {
+      "Architecture_Regime": "Multimodal_Platt_Cal",
+      "Recall@3": "0.4397",
+      "MRR": "1.0000",
+      "NDCG@3": "0.8105",
+      "Faithfulness": "0.6176",
+      "Relevance": "0.6773",
+      "Correctness": "0.7667",
+      "Hallucination_Rate": "0.0000",
+      "RAGAS_Composite": "0.5688",
+      "Avg_Answer_Length": "518",
+      "ECE": "0.3735",
+      "MCE": "0.3735",
+      "Brier_Score": "0.3741"
+    },
+    {
+      "Architecture_Regime": "Multimodal_Isotonic_Cal",
+      "Recall@3": "0.4582",
+      "MRR": "1.0000",
+      "NDCG@3": "0.8321",
+      "Faithfulness": "0.6281",
+      "Relevance": "0.6613",
+      "Correctness": "0.7667",
+      "Hallucination_Rate": "0.0000",
+      "RAGAS_Composite": "0.5636",
+      "Avg_Answer_Length": "513",
+      "ECE": "0.3731",
+      "MCE": "0.3731",
+      "Brier_Score": "0.3731"
+    },
+    {
+      "Architecture_Regime": "Agentic_RAG_Uncal",
+      "Recall@3": "0.4309",
+      "MRR": "1.0000",
+      "NDCG@3": "0.8012",
+      "Faithfulness": "0.6085",
+      "Relevance": "0.5380",
+      "Correctness": "0.7533",
+      "Hallucination_Rate": "0.0000",
+      "RAGAS_Composite": "0.4900",
+      "Avg_Answer_Length": "373",
+      "ECE": "0.1137",
+      "MCE": "0.4012",
+      "Brier_Score": "0.2435"
+    },
+    {
+      "Architecture_Regime": "Agentic_RAG_Platt_Cal",
+      "Recall@3": "0.4397",
+      "MRR": "1.0000",
+      "NDCG@3": "0.8105",
+      "Faithfulness": "0.6080",
+      "Relevance": "0.5393",
+      "Correctness": "0.7533",
+      "Hallucination_Rate": "0.0000",
+      "RAGAS_Composite": "0.4870",
+      "Avg_Answer_Length": "372",
+      "ECE": "0.3735",
+      "MCE": "0.3735",
+      "Brier_Score": "0.3741"
+    }
+  ],
+  "statistical_tests": {
+    "MinMax vs Platt (Multimodal)": {
+      "delta": -0.00488261292950071,
+      "ci": [
+        -0.02544198521173865,
+        0.01580573147109388
+      ],
+      "p_value": 0.657
+    },
+    "RRF vs Platt (Multimodal)": {
+      "delta": -0.007124611510155257,
+      "ci": [
+        -0.03797020221214876,
+        0.022774088187395753
+      ],
+      "p_value": 0.662
+    },
+    "Uncal vs Platt (Agentic)": {
+      "delta": 0.0029219208083663627,
+      "ci": [
+        -0.012638884483711688,
+        0.019348649272127233
+      ],
+      "p_value": 0.708
+    },
+    "Naive vs Calibrated Multimodal": {
+      "delta": -0.04804615099084342,
+      "ci": [
+        -0.07740067451675042,
+        -0.017782020692383334
+      ],
+      "p_value": 0.001
+    }
+  },
+  "power_analysis": {
+    "powers": {
+      "50": 0.5443291950022568,
+      "100": 0.8438969338072652,
+      "150": 0.9542233797886086,
+      "200": 0.9878815310004352,
+      "500": 0.9999986268052873
+    },
+    "mde": 0.22874847517668964,
+    "n_queries": 150
+  },
+  "example_answers": {
+    "Naive_RAG": [
+      "### Concise Clinical Assessment:\n\n**Probability of Distant Metastasis:**\nThe patient presents with a cT2a renal mass (7.8 cm) and Fuhrman Grade 2. The genomic assay indicates VHL mutation, PBRM1 mutat",
+      "### Concise Clinical Assessment:\n\n**Probability of Distant Metastasis:**\nAt presentation, the patient has a moderate risk of distant metastasis (M1). The genomic profile shows VHL mutation, PBRM1 muta",
+      "### Concise Clinical Assessment\n\n**Probability of Distant Metastasis:**\nGiven the patient's clinical characteristics and imaging findings, the probability of distant metastasis (M1) at presentation is"
+    ],
+    "Multimodal_Uncal_MinMax": [
+      "### Concise Clinical Assessment:\n\n**Probability of Distant Metastasis:**\nAt presentation, the patient has a moderate risk of distant metastasis (M1). The genomic analysis reveals VHL and PBRM1 mutatio",
+      "### Concise Clinical Assessment:\n\n**Probability of Distant Metastasis:**\nAt presentation, Patient #013 has a moderate risk of distant metastasis (M1). Given the patient's cT3b stage, Fuhrman Grade 3, ",
+      "### Concise Clinical Assessment:\n\n**Distant Metastasis Risk:**\nThe patient presents with a cT1a renal mass measuring 3.2 cm, Fuhrman Grade 2, and genomic features consistent with high-risk ccRCC (VHL "
+    ],
+    "Multimodal_Uncal_RRF": [
+      "### Concise Clinical Assessment:\n\n**Probability of Distant Metastasis:**\nThe patient presents with a cT2a renal mass (7.8 cm) and Fuhrman Grade 2. The genomic assay indicates VHL mutation, PBRM1 mutat",
+      "### Concise Clinical Assessment:\n\n**Probability of Distant Metastasis:**\nAt presentation, the patient has a moderate risk of distant metastasis (M1). Given the clinical T3b stage, Fuhrman Grade 3, and",
+      "**Concise Clinical Assessment:**\n\nPatient #019 presents with a cT1a renal mass (3.2 cm) with Fuhrman Grade 2, VHL mutation, BAP1 mutation, and PBRM1 wild-type. The genomic profile suggests a high-risk"
+    ],
+    "Multimodal_Platt_Cal": [
+      "### Concise Clinical Assessment:\n\n**Probability of Distant Metastasis:**\nAt presentation, the patient has a moderate risk of distant metastasis (M1). The genomic analysis reveals VHL and PBRM1 mutatio",
+      "### Concise Clinical Assessment:\n\n**Probability of Distant Metastasis:**\nAt presentation, Patient #013 has a moderate risk of distant metastasis (M1). Given the patient's cT3b stage, Fuhrman Grade 3, ",
+      "### Concise Clinical Assessment:\n\n**Distant Metastasis Risk:**\nThe patient presents with a cT1a renal mass measuring 3.2 cm, Fuhrman Grade 2, and genomic features consistent with high-risk ccRCC (VHL "
+    ],
+    "Multimodal_Isotonic_Cal": [
+      "### Concise Clinical Assessment:\n\n**Probability of Distant Metastasis:**\nAt presentation, the patient has a moderate risk of distant metastasis (M1). The genomic analysis reveals VHL and PBRM1 mutatio",
+      "### Concise Clinical Assessment:\n\n**Probability of Distant Metastasis:**\nAt presentation, Patient #013 has a moderate risk of distant metastasis (M1). Given the patient's cT3b stage, Fuhrman Grade 3, ",
+      "### Concise Clinical Assessment:\n\n**Distant Metastasis Risk:**\nThe patient presents with a cT1a renal mass measuring 3.2 cm, Fuhrman Grade 2, and genomic features consistent with high-risk ccRCC (VHL "
+    ],
+    "Agentic_RAG_Uncal": [
+      "### Concise Clinical Assessment:\n\n**Probability of Distant Metastasis:**\nAt presentation, the patient has a moderate risk of distant metastasis (M1). The genomic analysis reveals VHL and PBRM1 mutatio",
+      "### Concise Clinical Assessment:\n\n**Probability of Distant Metastasis:**\nAt presentation, Patient #013 has a moderate risk of distant metastasis (M1). Given the patient's cT3b stage, Fuhrman Grade 3, ",
+      "RenoFusion M1 Risk Score: 0.7200 (HIGH RISK). Calibrated with 5-fold OOF Platt scaling."
+    ],
+    "Agentic_RAG_Platt_Cal": [
+      "### Concise Clinical Assessment:\n\n**Probability of Distant Metastasis:**\nAt presentation, the patient has a moderate risk of distant metastasis (M1). The genomic analysis reveals VHL and PBRM1 mutatio",
+      "### Concise Clinical Assessment:\n\n**Probability of Distant Metastasis:**\nAt presentation, Patient #013 has a moderate risk of distant metastasis (M1). Given the patient's cT3b stage, Fuhrman Grade 3, ",
+      "RenoFusion M1 Risk Score: 0.7200 (HIGH RISK). Calibrated with 5-fold OOF Platt scaling."
+    ]
+  },
+  "runtime_seconds": 3636.248432159424
+}
