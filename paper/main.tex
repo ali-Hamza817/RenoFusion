@@ -14,7 +14,6 @@
 \usepackage{multirow}
 \usepackage{array}
 \usepackage{float}
-\usepackage{flafter} % Forces figures and tables to appear strictly AFTER their text reference
 \usepackage{placeins}
 \usepackage{afterpage}
 \usepackage{stfloats}
@@ -22,6 +21,21 @@
 \usepackage{subcaption}
 \usepackage{indentfirst}
 \setlength{\parindent}{1.5em}
+
+% Ensure figure and table captions match normal text font size as required
+\captionsetup{font=normalsize,labelfont=bf}
+
+% Float placement optimization parameters
+\renewcommand{\topfraction}{0.95}
+\renewcommand{\bottomfraction}{0.85}
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\floatpagefraction}{0.75}
+\renewcommand{\dbltopfraction}{0.95}
+\renewcommand{\dblfloatpagefraction}{0.75}
+\setcounter{topnumber}{4}
+\setcounter{bottomnumber}{3}
+\setcounter{totalnumber}{8}
+\setcounter{dbltopnumber}{4}
 
 % Custom tabularx column types for clean wrapping
 \newcolumntype{C}{>{\centering\arraybackslash}X}
@@ -42,8 +56,8 @@
 
 \begin{document}
 \let\WriteBookmarks\relax
-\def\floatpagepagefraction{1}
-\def\textpagefraction{.001}
+\def\floatpagepagefraction{0.75}
+\def\textpagefraction{.05}
 
 % Short title
 \shorttitle{RenoFusion: Calibration Hazards in Multimodal Fusion and RAG for ccRCC}
@@ -78,9 +92,12 @@ Multimodal Machine Learning \sep Decision-Level Fusion \sep Retrieval-Augmented 
 \input{sections/02_literature_review.tex}
 \input{sections/03_methodology.tex}
 \input{sections/04_results.tex}
+\FloatBarrier
 \input{sections/05_discussion.tex}
+\FloatBarrier
 \input{sections/06_limitations_future_conclusion.tex}
 
+\FloatBarrier
 \bibliographystyle{unsrtnat}
 \bibliography{references}
 
