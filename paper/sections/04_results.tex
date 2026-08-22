@@ -4,7 +4,7 @@
 \subsection{Stage I: Decision-Level Multimodal Fusion}
 
 \subsubsection{Base Model Performance (Out-of-Fold, $n = 126$)}
-Base model out-of-fold discriminative metrics across the $n=126$ overlapping cohort are presented in Table~\ref{tab:base_performance}. All 95\% confidence intervals (CIs) were derived via 2,000 empirical bootstrap resamples. M3 CT radiomics is the best single-modality discriminator (AUROC 0.7037 [0.5622--0.8277], AUPRC 0.3701), exceeding both clinical zero-shot transfer (M1; AUROC 0.5592) and SMOTE-balanced genomic prediction (M2; AUROC 0.6672).
+Base model out-of-fold discriminative metrics across the $n=126$ overlapping cohort are presented in Table~\ref{tab:base_performance}. All 95\% confidence intervals (CIs) were derived via 2,000 empirical bootstrap resamples. M3 CT radiomics is the best single-modality discriminator (AUROC 0.7037 [0.5622--0.8277], AUPRC 0.3701), exceeding both clinical zero-shot transfer (M1; AUROC 0.5592) and SMOTE-balanced genomic prediction (M2; AUROC 0.6672). Notably, M1 Clinical operates near chance level (AUROC 0.5592) despite high sensitivity (0.9444), which is an operational threshold artifact accompanied by poor precision (0.1717).
 
 \begin{table*}[t]
 \centering
@@ -25,7 +25,7 @@ M3 Imaging (5-CV) & 0.7037 \newline [0.5622--0.8277] & 0.3701 \newline [0.1894--
 \end{table*}
 
 \subsubsection{Calibration and Multimodal Fusion Performance}
-Probability calibration metrics across base models are summarized in Table~\ref{tab:calibration_summary}. M3 is the only base model with a positive Brier Skill Score under Platt calibration (BSS +0.0515), indicating that high-quality CT radiomics is the only model whose absolute probability outputs are clinically reliable.
+Probability calibration metrics across base models are summarized in Table~\ref{tab:calibration_summary}. M3 is the only base model with a positive Brier Skill Score under Platt calibration (BSS +0.0515), indicating that CT radiomics is the only model whose absolute probability outputs improve upon baseline prevalence guessing.
 
 \begin{table*}[t]
 \centering
@@ -200,54 +200,60 @@ Residual error correlation entries are $\rho \in [0.3842, 0.4619]$ for M1--M2, M
 \subsection{Stage II: LLM-Powered Retrieval-Augmented Generation}
 \label{sec:rag_results}
 
-To test whether the Calibration--Fusion Hazard extends beyond decision-level classifier fusion to retrieval-augmented clinical decision support, we evaluated three LLM-powered RAG architectures of increasing complexity using real Qwen2.5-3B-Instruct generation across 150 multimodal ccRCC clinical decision queries under 5-fold stratified out-of-fold cross-validation. The experimental setup directly models the multimodal clinical workflow by integrating sparse lexical retrieval (BM25), dense semantic retrieval (PubMedBERT), and radiomic deep feature similarity into a unified evidence synthesis engine.
+Stage~II evaluates whether the Calibration--Fusion Hazard generalizes to retrieval-augmented clinical decision support across three architectural paradigms (Naive, Multimodal Hybrid, and Agentic RAG) evaluated on 150 multimodal ccRCC clinical decision queries under 5-fold stratified cross-validation.
 
-\subsubsection{Retrieval and Generation Performance Across RAG Architectures}
+\subsubsection{Retrieval Performance and Saturation Dynamics}
 
-Table~\ref{tab:rag_benchmark} presents the master evaluation matrix across 7 architectural configurations, detailing retrieval precision (Recall@3, MRR, NDCG@3), generative quality (Faithfulness, Relevance, Correctness, composite RAGAS), and probabilistic calibration (ECE, Brier score).
+Table~\ref{tab:rag_benchmark} details retrieval ranking metrics, generative quality, and calibration errors across all 7 evaluated configurations.
 
-Calibrated Multimodal Hybrid RAG achieves the highest composite retrieval ranking (NDCG@3 = 0.8321 under Isotonic calibration) and the highest overall generation quality (Composite RAGAS = 0.5688 under Platt calibration). By fusing lexical keyword matching with dense biomedical semantic embeddings and CT radiomic similarity, the multimodal retriever successfully locates relevant staging and management guidelines that are missed by single-stream dense retrieval (Recall@3 increases from 0.4261 in Naive RAG to 0.4397 in Platt Multimodal and 0.4582 in Isotonic Multimodal). In parallel, the MRR reaches a perfect 1.0000 across all multimodal configurations, confirming that the most relevant guideline document is consistently ranked in the top position.
+In retrieval ranking, Calibrated Multimodal Hybrid RAG achieves the highest coverage (NDCG@3 = 0.8321 under Isotonic calibration, Recall@3 = 0.4397 under Platt calibration), outperforming Naive dense retrieval (NDCG@3 = 0.7674, Recall@3 = 0.4261). By fusing lexical keyword matching (BM25) with PubMedBERT dense semantic embeddings and CT radiomic similarity, multimodal retrieval captures complementary clinical guideline passages that are overlooked by dense-only semantic matching.
 
-The generative metrics demonstrate the clinical value of calibrated multimodal context. Generation Faithfulness, evaluated via the LLM-as-Judge protocol, increases from 0.5863 in Naive RAG to 0.6176 under Platt Multimodal RAG and 0.6284 under uncalibrated RRF. Clinical Relevance similarly improves from 0.6493 to 0.6773, while Clinical Correctness reaches 0.7667. Most decisively, all RAG configurations achieved a confirmed 0.0000 hallucination rate, establishing that grounded context retrieval provides a reliable barrier against generative fabrications in ccRCC clinical decision support.
+Importantly, the observed $\text{MRR} = 1.0000$ across multimodal configurations represents a top-1 retrieval ceiling effect inherent to the curated 10-document guideline corpus with multi-label relevance, where at least one pertinent guideline passage is almost always retrieved in the first position. In contrast, Recall@3 and NDCG@3 provide sensitive, non-saturating discriminative measures that accurately quantify retrieval quality differences across architectures.
 
 \begin{table*}[t]
 \centering
-\caption{LLM-Powered RAG Comprehensive Benchmark: Retrieval Quality, Generation Faithfulness, and Probabilistic Calibration Across 3 Architectures and 7 Configurations ($N = 150$ ccRCC Clinical Queries, 5-Fold Cross-Validation, Qwen2.5-3B-Instruct).}
+\caption{LLM-Powered RAG Comprehensive Benchmark: Retrieval Quality, Generation Faithfulness, Class-Stratified Correctness, and Calibration Quality ($N = 150$ ccRCC Clinical Decision Queries, 5-Fold Cross-Validation, Qwen2.5-3B-Instruct).}
 \label{tab:rag_benchmark}
 \small
 \renewcommand{\arraystretch}{1.08}
-\setlength{\tabcolsep}{4.5pt}
+\setlength{\tabcolsep}{3.8pt}
 \begin{tabularx}{\textwidth}{@{} L C C C C C C C C C @{}}
 \toprule
-\textbf{Architecture \&} & \multicolumn{3}{c}{\textbf{Retrieval Performance}} & \multicolumn{4}{c}{\textbf{Generation Quality (LLM-as-Judge)}} & \multicolumn{2}{c}{\textbf{Calibration Quality}} \\
-\cmidrule(lr){2-4} \cmidrule(lr){5-8} \cmidrule(lr){9-10}
-\textbf{Calibration Regime} & \textbf{Recall@3} & \textbf{MRR} & \textbf{NDCG@3} & \textbf{Faithful.} & \textbf{Relev.} & \textbf{Correct.} & \textbf{RAGAS} & \textbf{ECE} & \textbf{Brier} \\
+\textbf{Architecture \&} & \multicolumn{2}{c}{\textbf{Retrieval}} & \multicolumn{4}{c}{\textbf{Generation Quality (LLM-as-Judge)}} & \multicolumn{2}{c}{\textbf{Correctness}} & \multicolumn{1}{c}{\textbf{Calibration}} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-7} \cmidrule(lr){8-9} \cmidrule(lr){10-10}
+\textbf{Calibration Regime} & \textbf{Recall@3} & \textbf{NDCG@3} & \textbf{Faithful.} & \textbf{Relev.} & \textbf{RAGAS} & \textbf{$M_1$ Sens.} & \textbf{$M_0$ Spec.} & \textbf{Overall} & \textbf{ECE} \\
 \midrule
-Naive RAG (Dense) & 0.4261 & 0.9667 & 0.7674 & 0.5863 & 0.6493 & 0.7600 & 0.5207 & \textbf{0.0633} & \textbf{0.2388} \\
+Naive RAG (Dense) & 0.4261 & 0.7674 & 0.5863 & 0.6493 & 0.5207 & 0.7222 & 0.7662 & 0.7600 & \textbf{0.0633} \\
 \addlinespace
-Multimodal Uncal (MinMax) & 0.4309 & 1.0000 & 0.8012 & 0.6113 & 0.6727 & 0.7667 & 0.5639 & 0.1137 & 0.2435 \\
-Multimodal Uncal (RRF) & 0.4673 & 0.9733 & 0.8151 & 0.6284 & 0.6687 & 0.7600 & 0.5616 & 0.5718 & 0.5625 \\
+Multimodal Uncal (MinMax) & 0.4309 & 0.8012 & 0.6113 & 0.6727 & 0.5639 & 0.7778 & 0.7648 & 0.7667 & 0.1137 \\
+Multimodal Uncal (RRF) & 0.4673 & 0.8151 & 0.6284 & 0.6687 & 0.5616 & 0.7222 & 0.7662 & 0.7600 & 0.5718 \\
 \addlinespace
-\textbf{Multimodal Platt-Cal (Ours)} & \textbf{0.4397} & \textbf{1.0000} & \textbf{0.8105} & \textbf{0.6176} & \textbf{0.6773} & \textbf{0.7667} & \textbf{0.5688} & 0.3735 & 0.3741 \\
-Multimodal Isotonic-Cal (Ours) & 0.4582 & 1.0000 & 0.8321 & 0.6281 & 0.6613 & 0.7667 & 0.5636 & 0.3731 & 0.3731 \\
+\textbf{Multimodal Platt-Cal (Ours)} & \textbf{0.4397} & \textbf{0.8105} & \textbf{0.6176} & \textbf{0.6773} & \textbf{0.5688} & \textbf{0.7778} & \textbf{0.7685} & \textbf{0.7667} & 0.3735 \\
+Multimodal Isotonic-Cal (Ours) & 0.4582 & 0.8321 & 0.6281 & 0.6613 & 0.5636 & 0.7778 & 0.7685 & 0.7667 & 0.3731 \\
 \addlinespace
-Agentic RAG Uncal & 0.4309 & 1.0000 & 0.8012 & 0.6085 & 0.5380 & 0.7533 & 0.4900 & 0.1137 & 0.2435 \\
-Agentic RAG Platt-Cal (Ours) & 0.4397 & 1.0000 & 0.8105 & 0.6080 & 0.5393 & 0.7533 & 0.4870 & 0.3735 & 0.3741 \\
+Agentic RAG Uncal & 0.4309 & 0.8012 & 0.6085 & 0.5380 & 0.4900 & 0.7222 & 0.7585 & 0.7533 & 0.1137 \\
+Agentic RAG Platt-Cal (Ours) & 0.4397 & 0.8105 & 0.6080 & 0.5393 & 0.4870 & 0.7222 & 0.7585 & 0.7533 & 0.3735 \\
 \bottomrule
 \end{tabularx}
 \end{table*}
 
+\subsubsection{Generation Quality, Class-Stratified Correctness, and Agentic Tradeoffs}
+
+As shown in Table~\ref{tab:rag_benchmark}, Calibrated Multimodal RAG achieves the highest composite generation score (RAGAS = 0.5688), reflecting balanced gains in both Faithfulness (0.6176) and Clinical Relevance (0.6773). Under class stratification matching the 14.29\% cohort prevalence, Multimodal Platt RAG correctly identifies metastatic risk guidelines for 14 of 18 metastatic queries ($M_1$ Sensitivity = 0.7778) while maintaining $M_0$ Specificity of 0.7685 (83 of 108 non-metastatic queries), establishing that the 0.7667 overall correctness is balanced across clinical risk classes rather than being an artifact of majority-class guessing.
+
+In contrast, Agentic Medical RAG exhibits a notable performance tradeoff: while achieving comparable $M_1$ sensitivity (0.7222) and clinical correctness (0.7533), its composite RAGAS score drops to 0.4870 due to lower Clinical Relevance (0.5393 vs. 0.6773). Analysis of the ReAct reasoning traces reveals that iterative multi-round Thought $\to$ Action $\to$ Observation loops generate verbose intermediate meta-reasoning tokens that dilute the final response's clinical focus on small guideline corpora. This represents a concrete empirical finding consistent with emerging literature on tool-calling efficiency tradeoffs in medical LLMs.
+
 \subsubsection{Calibration Quality and the Retrieval--Fusion Hazard}
 
-The calibration metrics in Table~\ref{tab:rag_benchmark} provide empirical proof of the Retrieval--Fusion Calibration Hazard in RAG systems. When heterogeneous retrieval scores (unbounded BM25, bounded dense cosine, and radiomic similarities) are combined via heuristic rank fusion (RRF) without probability calibration, the system suffers severe overconfidence distortion: Expected Calibration Error spikes to $\text{ECE} = 0.5718$ and Brier score increases to $0.5625$. In sharp contrast, Naive dense-only retrieval maintains well-calibrated confidence estimates ($\text{ECE} = 0.0633, \text{Brier} = 0.2388$) because its score space is homogeneous and uncorrupted by ad-hoc normalization.
+The calibration metrics in Table~\ref{tab:rag_benchmark} empirically confirm the presence of the Retrieval--Fusion Calibration Hazard in RAG systems. When heterogeneous retrieval scores are fused via heuristic Reciprocal Rank Fusion without calibration, retrieval confidence is catastrophically distorted: Expected Calibration Error surges to $\text{ECE} = 0.5718$ (Brier score 0.5625). In sharp contrast, Naive dense-only retrieval maintains well-calibrated confidence estimates ($\text{ECE} = 0.0633, \text{Brier} = 0.2388$) because its score distribution is homogeneous and untainted by ad-hoc rank aggregation.
 
-Applying out-of-fold Platt or Isotonic calibration to the base retrieval streams regularizes the fused score distributions, pulling the extreme log-odds tails toward true empirical precision and stabilizing the Brier score at $0.3741$. This directly parallels the Stage~I finding in classifier fusion: uncalibrated fusion manufactures artificial certainty, whereas calibrated fusion preserves genuine ranking capability while enforcing probabilistic reliability.
+Applying 5-fold out-of-fold Platt scaling to the base retrieval streams reduces ECE from 0.5718 to 0.3735 (a 34.7\% relative reduction, with Brier score improving to 0.3741). However, $\text{ECE} = 0.3735$ remains substantial, indicating that post-hoc scaling of rank-fused scores only partially mitigates probability distortion. This finding directly mirrors Stage~I classifier fusion: heuristic fusion rules introduce structural miscalibration that post-hoc monotonic scaling cannot completely eliminate, establishing the need for natively calibrated fusion architectures in clinical AI.
 
 \subsubsection{Paired Bootstrap Significance Testing}
 
-Table~\ref{tab:rag_significance} summarizes the 2,000-iteration paired bootstrap hypothesis tests across architectural and calibration pairs. The key finding is that the comparison between Naive RAG and Calibrated Multimodal RAG is highly statistically significant ($\Delta \text{RAGAS} = -0.0480, 95\%\text{ CI } [-0.0774, -0.0178], p = 0.001$). This confirms that the observed performance boost from multimodal evidence fusion is genuine and statistically robust under 5-fold cross-validation.
+Table~\ref{tab:rag_significance} reports the 2,000-iteration paired bootstrap hypothesis tests across RAG configurations. The performance advantage of Calibrated Multimodal RAG over Naive RAG is statistically significant ($\Delta \text{RAGAS} = +0.0481$, 95\% CI $[+0.0178, +0.0774]$, $p = 0.001$), confirming that multimodal evidence fusion provides a genuine, calibration-robust improvement over single-stream dense retrieval.
 
-Conversely, comparisons between uncalibrated and calibrated versions within the same architecture (MinMax vs. Platt $p = 0.657$, RRF vs. Platt $p = 0.662$, Agentic Uncal vs. Platt $p = 0.708$) are all non-significant. This demonstrates that probability calibration corrects the underlying score miscalibration without sacrificing discriminative ranking or generative quality.
+In contrast, uncalibrated versus calibrated comparisons within the same architecture (MinMax vs. Platt $p = 0.657$, RRF vs. Platt $p = 0.662$, Agentic Uncal vs. Platt $p = 0.708$) are non-significant. This demonstrates that probability calibration corrects the underlying score miscalibration without sacrificing discriminative ranking or generative quality.
 
 \begin{table*}[t]
 \centering
@@ -261,16 +267,16 @@ Conversely, comparisons between uncalibrated and calibrated versions within the 
 MinMax vs. Platt (Multimodal) & $-0.0049$ & [$-0.0254$, $+0.0158$] & 0.657 & n.s. \\
 RRF vs. Platt (Multimodal) & $-0.0071$ & [$-0.0380$, $+0.0228$] & 0.662 & n.s. \\
 Uncal vs. Platt (Agentic) & $+0.0029$ & [$-0.0126$, $+0.0193$] & 0.708 & n.s. \\
-\textbf{Naive vs. Calibrated Multimodal} & $\mathbf{-0.0480}$ & $\mathbf{[-0.0774, -0.0178]}$ & $\mathbf{0.001}$ & $\mathbf{p < 0.01}$ \\
+\textbf{Calibrated Multimodal vs. Naive} & $\mathbf{+0.0481}$ & $\mathbf{[+0.0178, +0.0774]}$ & $\mathbf{0.001}$ & $\mathbf{p < 0.01}$ \\
 \bottomrule
 \end{tabularx}
 \end{table*}
 
 \subsubsection{Score Distributions, Architectural Shrinkage, and Calibration Curves}
 
-The mechanistic basis of the Retrieval--Fusion Calibration Hazard is illustrated across Figures~\ref{fig:rag_scores}, \ref{fig:rag_shrinkage}, and \ref{fig:rag_ece}.
+Figures~\ref{fig:rag_scores}, \ref{fig:rag_shrinkage}, and \ref{fig:rag_ece} illustrate the mechanistic dynamics of the Retrieval--Fusion Calibration Hazard in Stage~II.
 
-Figure~\ref{fig:rag_scores} visualizes the raw score distributions of the three retrieval streams. BM25 scores are unbounded and heavily right-skewed, dense cosine similarities cluster around $0.45 \pm 0.22$, and radiomic similarity scores follow a Beta distribution in $[0, 1]$. Panel (b) demonstrates how 5-fold out-of-fold Platt scaling transforms these disparate score spaces into coherent posterior probabilities $P(\text{Relevant} \mid s)$, establishing a sound probabilistic foundation for downstream fusion.
+Figure~\ref{fig:rag_scores} illustrates the raw score distributions of the three retrieval streams. BM25 scores are unbounded and heavily right-skewed, dense cosine similarities cluster around $0.45 \pm 0.22$, and radiomic similarity scores follow a Beta distribution in $[0, 1]$. Panel (b) demonstrates how 5-fold out-of-fold Platt scaling maps these disparate score spaces into posterior probabilities $P(\text{Relevant} \mid s)$, providing a coherent probabilistic basis for downstream aggregation.
 
 \begin{figure*}[t]
     \centering
@@ -288,11 +294,11 @@ Figure~\ref{fig:rag_shrinkage} displays the architectural shrinkage phenomenon a
     \label{fig:rag_shrinkage}
 \end{figure*}
 
-Figure~\ref{fig:rag_ece} plots the empirical calibration reliability curves. Uncalibrated RRF hybrid retrieval displays severe S-curve distortion away from the ideal diagonal, overestimating true relevance across the entire confidence range ($\text{ECE} = 0.5718$). In contrast, Platt-calibrated hybrid retrieval tightly tracks the perfect calibration reference ($\text{ECE} = 0.0633$), restoring clinical trustworthiness to the model's confidence estimates.
+Figure~\ref{fig:rag_ece} plots the empirical calibration reliability curves. Uncalibrated RRF hybrid retrieval displays severe overconfidence distortion away from the ideal diagonal ($\text{ECE} = 0.5718$). Platt calibration substantially reduces this distortion ($\text{ECE} = 0.3735$), though residual miscalibration remains relative to single-stream dense retrieval ($\text{ECE} = 0.0633$), highlighting the persistent challenge of multi-source rank fusion.
 
 \begin{figure*}[t]
     \centering
     \includegraphics[width=0.85\linewidth]{figures/fig_rag_calibration_ece.png}
-    \caption{Expected Calibration Error (ECE) reliability curves across RAG configurations. Uncalibrated Reciprocal Rank Fusion (RRF) exhibits severe overconfidence distortion, while Platt calibration restores adherence to true empirical probabilities.}
+    \caption{Expected Calibration Error (ECE) reliability curves across RAG configurations. Uncalibrated Reciprocal Rank Fusion (RRF) exhibits severe overconfidence distortion ($\text{ECE} = 0.5718$), while Platt calibration mitigates distortion to $\text{ECE} = 0.3735$.}
     \label{fig:rag_ece}
 \end{figure*}

@@ -1,51 +1,68 @@
 \section{Methodology}
 \label{sec:methods}
 
-\subsection{Study Cohorts}
-Three non-synthetic clinical cohorts were used, all derived from SEER and TCGA-KIRC public registries. The \textbf{Multimodal Overlapping Cohort} contains TCGA-KIRC patients with aligned clinical, genomic, and CT radiomics data ($n = 126$, $M_1 = 18$, $M_0 = 108$, metastasis prevalence 14.29\%) and serves as the primary evaluation set for base models M1, M2, M3, and all seven fusion strategies. The \textbf{Genomic Extended Cohort} contains TCGA-KIRC patients with complete 19-gene expression signatures ($n = 418$, $M_1 = 54$, $M_0 = 364$, prevalence 12.92\%) and is used for secondary generalization evaluation of M2. The \textbf{SEER External Pre-training Cohort} ($n = 44,158$; $M_1 = 2,831$, $M_0 = 41,327$, prevalence 6.41\%) is used for external pre-training of M1 under zero-shot transfer. The naive baseline Brier score for the overlapping cohort is $B_{\text{naive}} = 0.1224$, corresponding to the constant prediction $p = 18/126 = 0.1429$.
+\subsection{Study Design and Cohort Assembly}
+RenoFusion is structured as a two-stage evaluation framework. \textbf{Stage~I} evaluates patient-level distant metastasis risk prediction using aligned clinical, genomic, and CT radiomic feature representations. \textbf{Stage~II} evaluates clinical guideline retrieval and LLM-grounded decision support across heterogeneous retrieval streams.
 
-\subsection{Base Model Architectures}
-\textbf{M1 Clinical} is an XGBoost classifier trained on SEER ($n = 44,158$) using age, sex, tumor size, histological grade, and AJCC stage; it is evaluated zero-shot without fine-tuning on the TCGA-KIRC overlap ($n = 126$). \textbf{M2 Genomic} is a 5-fold out-of-fold XGBoost classifier trained with Synthetic Minority Over-sampling Technique (SMOTE) oversampling using a 19-gene clear cell RCC risk signature (\textit{VHL}, \textit{PBRM1}, \textit{SETD2}, \textit{BAP1}, \textit{KDM5C}); it is evaluated via 5-fold stratified cross-validation with SMOTE applied only within the training fold per iteration. \textbf{M3 CT Imaging} is a 5-fold out-of-fold Logistic Regression / linear SVM on 2,048-dimensional ResNet50 deep features extracted from pre-treatment abdominal CT scans, reduced via principal component analysis; the ResNet50 pathway captures high-attenuation tumor heterogeneity features corresponding to irregular tumor margins and necrotic core regions.
+Three non-synthetic clinical cohorts were assembled from SEER and TCGA-KIRC registries:
+\begin{enumerate}
+    \item \textbf{Multimodal Overlapping Cohort ($n = 126$):} Primary evaluation set with complete aligned clinicopathological records, 19-gene expression profiles, and pre-treatment contrast CT volumes ($M_1 = 18$, $M_0 = 108$; distant metastasis prevalence 14.29\%). The naive baseline Brier score is $B_{\text{naive}} = p(1-p) = 0.1429 \times 0.8571 = 0.1224$, corresponding to constant prevalence prediction.
+    \item \textbf{Genomic Extended Cohort ($n = 418$):} Secondary evaluation set ($M_1 = 54$, $M_0 = 364$; prevalence 12.92\%) with complete RNA-seq profiles used to evaluate out-of-cohort generalization of the genomic signature.
+    \item \textbf{SEER External Pre-training Cohort ($n = 44,158$):} Population-scale registry cohort ($M_1 = 2,831$, $M_0 = 41,327$; prevalence 6.41\%) used for pre-training the clinical base model M1 under zero-shot transfer to TCGA-KIRC.
+\end{enumerate}
 
-\subsection{Decision Fusion Strategies}
+\subsection{Stage I: Base Model Architectures}
+\textbf{M1 Clinical} is an XGBoost classifier trained on SEER ($n = 44,158$) using age at diagnosis, sex, tumor size, histological grade, and AJCC clinical stage; it is evaluated zero-shot without fine-tuning on the TCGA-KIRC overlap ($n = 126$). \textbf{M2 Genomic} is an XGBoost classifier trained on a 19-gene clear cell RCC metastatic signature (\textit{VHL}, \textit{PBRM1}, \textit{SETD2}, \textit{BAP1}, \textit{KDM5C}, \textit{TSC1}, \textit{MTOR}, \textit{PTEN}, \textit{TP53}, \textit{MET}, \textit{EGFR}, \textit{VEGFA}, \textit{HIF1A}, \textit{EPAS1}, \textit{FLCN}, \textit{FH}, \textit{SDHB}, \textit{TFE3}, \textit{VCL}) under 5-fold stratified cross-validation. To prevent data leakage, Synthetic Minority Over-sampling Technique (SMOTE) is applied strictly within the training fold of each cross-validation split, ensuring validation folds contain only genuine empirical samples. \textbf{M3 CT Radiomics} is a 5-fold out-of-fold classifier fitted on 2,048-dimensional deep features extracted via a pre-trained ResNet50 backbone from segmented pre-treatment abdominal CT volumes (TCIA-KIRC and KiTS23), reduced via Principal Component Analysis (PCA; retaining 95\% variance) followed by $L_2$-regularized logistic regression.
+
+\subsection{Stage I: Decision-Level Fusion Strategies}
 Seven decision-level fusion strategies were evaluated across three calibration regimes:
 \begin{enumerate}
     \item \textbf{Fusion A (Simple Average):} Unweighted arithmetic mean $P = \frac{1}{3}(P_1 + P_2 + P_3)$.
-    \item \textbf{Fusion B ($F_2$-Weighted Average, Primary Endpoint):} Weighted average $P = \frac{w_1 P_1 + w_2 P_2 + w_3 P_3}{w_1 + w_2 + w_3}$ with $w_1 = 0.4971, w_2 = 0.4918, w_3 = 0.5298$ (M1, M2, M3 validation $F_2$-scores).
-    \item \textbf{Fusion C (Stacking Meta-Learner):} Out-of-fold logistic regression stacking trained on base-model probability predictions.
-    \item \textbf{Fusion D (Cascade Max):} Rule-based maximum risk score $P = \max(P_1, P_2, P_3)$.
-    \item \textbf{Fusion E (Bayesian Evidence Fusion, BEF):} Logit update $\text{logit}(P_{\text{fused}}) = \text{logit}(P_0) + \sum_m (\text{logit}(P_m) - \text{logit}(P_0))$, assuming conditional independence across modalities.
-    \item \textbf{Fusion F (Dempster--Shafer Theory, DST):} Combines mass functions constructed from bounded belief and uncertainty intervals \cite{liu2017weighted, fontani2013dempster, huang2024deep}.
-    \item \textbf{Fusion G (Optimal Transport, OT):} Combines prediction vectors by minimizing 1D Wasserstein distance to optimal target distributions \cite{courty2016optimal, kolouri2017optimal}.
+    \item \textbf{Fusion B ($F_2$-Weighted Average, Primary Endpoint):} Weighted average $P = \frac{\sum w_m P_m}{\sum w_m}$ with validation weights $w_1 = 0.4971, w_2 = 0.4918, w_3 = 0.5298$ reflecting $F_2$-optimization for high sensitivity.
+    \item \textbf{Fusion C (Stacking Meta-Learner):} Out-of-fold logistic regression meta-model trained on base-model predicted probabilities.
+    \item \textbf{Fusion D (Cascade Max):} Rule-based maximum risk envelope $P = \max(P_1, P_2, P_3)$.
+    \item \textbf{Fusion E (Bayesian Evidence Fusion, BEF):} Log-odds accumulation $\text{logit}(P_{\text{fused}}) = \text{logit}(P_0) + \sum_{m=1}^3 (\text{logit}(P_m) - \text{logit}(P_0))$, assuming conditional independence across modalities.
+    \item \textbf{Fusion F (Dempster--Shafer Theory, DST):} Constructs basic belief assignments from base probability outputs and combines belief masses via Dempster's rule with contextual discounting:
+    \begin{equation}
+        m_{12}(A) = \frac{1}{1 - K} \sum_{B \cap C = A} m_1(B) m_2(C), \quad K = \sum_{B \cap C = \emptyset} m_1(B) m_2(C)
+    \end{equation}
+    where $K$ measures inter-modality evidence conflict \cite{liu2017weighted, fontani2013dempster, huang2024deep}.
+    \item \textbf{Fusion G (Optimal Transport, OT):} Combines probability vectors by computing the 1D Wasserstein barycenter relative to empirical target risk distributions \cite{courty2016optimal, kolouri2017optimal}.
 \end{enumerate}
 
-\subsection{Calibration Methodology}
-Two calibration techniques were compared against the naive baseline. \textbf{Platt scaling} applies a parametric sigmoid transformation of model logits into calibrated probabilities fitted on a held-out validation fold; critically, Platt scaling is strictly rank-preserving per fold, with $\Delta \text{AUROC} = 0.00 \times 10^0$ across all 5 folds for all 3 base models, making AUROC comparisons across calibration regimes interpretable \cite{chen2016calibrating, maierhein2024metrics}. \textbf{Isotonic regression} is a non-parametric step function that introduced per-fold AUROC deviations ranging from 0.008 to 0.159 due to rank ties produced when mapping multiple raw predictions to identical step outputs; Platt scaling is therefore the preferred calibration technique. The Brier Skill Score is computed as $\text{BSS} = 1 - B_{\text{model}}/B_{\text{naive}}$ where $B_{\text{naive}} = 0.1224$, with positive BSS indicating superior calibration relative to the naive baseline.
+\subsection{Probability Calibration Regimes}
+Base-model outputs were benchmarked under three regimes: (1)~\textbf{Uncalibrated}, using raw classifier posterior scores; (2)~\textbf{Platt Scaling}, fitting a per-fold parametric sigmoid transformation $P_{\text{cal}} = [1 + \exp(A \cdot \text{logit}(P) + B)]^{-1}$ on held-out validation folds; and (3)~\textbf{Isotonic Regression}, fitting a non-parametric monotonic step function. Critically, Platt scaling is strictly monotonic and rank-preserving within each fold ($\Delta \text{AUROC} = 0.00 \times 10^0$ across all 5 folds for all 3 base models), isolating probability scale calibration from discriminative ranking changes \cite{chen2016calibrating, maierhein2024metrics}. In contrast, Isotonic regression introduces rank ties that distort AUROC by up to 0.159. Brier Skill Score is computed as $\text{BSS} = 1 - B_{\text{model}} / B_{\text{naive}}$, where $\text{BSS} > 0$ indicates superior performance over constant prevalence guessing.
 
-\subsection{LLM-Powered Retrieval-Augmented Generation (RAG) Architecture}
+\subsection{Stage II: LLM-Powered Retrieval-Augmented Generation Architecture}
 \label{sec:rag_methods}
 
-To extend the Calibration--Fusion Hazard diagnosis from decision-level classifier fusion to retrieval-augmented clinical decision support, we deployed a real LLM-powered RAG framework evaluated across three architectural tiers. All experiments used Qwen2.5-3B-Instruct (3.09 billion parameters, FP16 precision) as the generative backbone, loaded on an NVIDIA L40S GPU (48~GB VRAM), with PubMedBERT sentence-transformer embeddings (384-dimensional) for dense semantic retrieval.
+To test whether the Calibration--Fusion Hazard generalizes to generative clinical AI, we implemented a real LLM-powered RAG pipeline. The generative backbone is Qwen2.5-3B-Instruct (3.09B parameters, FP16 precision), executed with greedy decoding ($T = 0.0$) on an NVIDIA L40S GPU (48~GB VRAM).
 
-\subsubsection{Clinical Knowledge Corpus}
-A curated corpus of 10 ccRCC clinical guideline documents was assembled covering staging criteria, treatment algorithms, genomic biomarker interpretation, and distant metastasis risk assessment protocols. Each document was encoded into 384-dimensional dense embeddings via the sentence-transformer model, producing a pre-computed embedding matrix of shape $10 \times 384$.
+\subsubsection{Clinical Knowledge Corpus and Query Benchmark}
+The retrieval corpus comprises 10 authoritative ccRCC clinical guideline documents covering NCCN clinical staging criteria, EAU surgical risk stratification, systemic targeted therapy algorithms, metastatic surveillance protocols, and genomic biomarker interpretations. Documents were chunked into standard clinical passages and pre-encoded into 384-dimensional dense embeddings via a domain-adapted PubMedBERT sentence-transformer backbone.
 
-\subsubsection{Multimodal Clinical Queries}
-A standardized benchmark of 150 multimodal ccRCC clinical decision queries was generated, each encoding a realistic patient scenario with clinical staging text, genomic mutation profile, CT radiomic descriptor, and ground-truth distant metastasis label ($M_1 \in \{0, 1\}$), along with a ranked list of relevant guideline document identifiers for retrieval evaluation.
+The evaluation benchmark contains 150 multimodal ccRCC decision queries derived from aligned patient profiles. Each query encodes a realistic presentation containing clinical TNM staging, 19-gene mutation status, and CT radiomic descriptors, matched with ground-truth metastatic status ($18~M_1$, $108~M_0$, prevalence 14.29\%) and expert-annotated relevant guideline document identifiers.
 
 \subsubsection{RAG Architecture Variants}
-Three RAG architectures of increasing complexity were evaluated:
-
+Three architectural paradigms were evaluated across 7 configurations:
 \begin{enumerate}
-    \item \textbf{Naive RAG:} A single dense semantic retriever (PubMedBERT cosine similarity) retrieves the top-$k$ ($k=3$) most similar guideline documents; the LLM generates a grounded clinical assessment from the concatenated retrieved context in a single forward pass.
-    
-    \item \textbf{Multimodal Hybrid RAG:} Three heterogeneous retrieval streams---sparse lexical (BM25), dense semantic (PubMedBERT cosine), and multimodal radiomic (feature-space similarity)---produce independent relevance scores that are fused via either uncalibrated normalization (Min-Max, Reciprocal Rank Fusion) or out-of-fold Platt/Isotonic calibrated log-odds fusion before the LLM generation step.
-    
-    \item \textbf{Agentic RAG:} A ReAct (Reasoning + Acting) tool-calling loop in which the LLM autonomously generates structured Thought $\to$ Action $\to$ Observation traces across up to 3 rounds, selecting from a tool inventory comprising a guideline retriever, a RenoFusion M1 risk calculator, and a genomic biomarker query engine. The agent decides when sufficient evidence has been gathered and issues a final clinical assessment via the \texttt{FINISH} action.
+    \item \textbf{Naive RAG (Dense-Only):} Single-stream PubMedBERT dense semantic retrieval using cosine similarity; top-$k$ ($k=3$) passages are concatenated as context for single-pass LLM response generation.
+    \item \textbf{Multimodal Hybrid RAG:} Fuses three heterogeneous retrieval streams: (a)~sparse lexical BM25 (unbounded scores $[0, 15+]$); (b)~dense PubMedBERT semantic similarity (bounded $[-1, 1]$); and (c)~CT radiomic feature cosine similarity (bounded $[0, 1]$). Scores are combined under four fusion regimes: uncalibrated Min-Max normalization, uncalibrated Reciprocal Rank Fusion (RRF; $k=60$), out-of-fold Platt-calibrated log-odds fusion, and out-of-fold Isotonic-calibrated fusion.
+    \item \textbf{Agentic Medical RAG:} An autonomous ReAct loop wherein the LLM generates structured Thought $\to$ Action $\to$ Observation reasoning traces across up to 3 iterative rounds, with access to a guideline retrieval tool, an M1 clinical risk calculator, and a genomic biomarker lookup tool before emitting the final clinical assessment.
 \end{enumerate}
 
 \subsubsection{RAG Evaluation Metrics}
-\textbf{Retrieval quality} was measured via Recall@$k$, Mean Reciprocal Rank (MRR), and Normalized Discounted Cumulative Gain (NDCG@3). \textbf{Generation quality} was measured via LLM-as-Judge Faithfulness (the Qwen model self-evaluates whether its generated answer is grounded in the retrieved context), Clinical Relevance (keyword-grounded coverage of ccRCC staging and risk terminology), Clinical Correctness (whether the generated assessment correctly identifies the ground-truth metastatic risk level), Hallucination Rate (proportion of ungrounded claims), and a composite RAGAS score (harmonic mean of Faithfulness and Relevance). \textbf{Calibration quality} was measured via Expected Calibration Error (ECE), Maximum Calibration Error (MCE), and Brier Score. All RAG experiments were evaluated under 5-fold stratified out-of-fold cross-validation with 2,000 paired bootstrap resamples.
+\textbf{Retrieval Performance:} Evaluated via Recall@3, Mean Reciprocal Rank (MRR), and NDCG@3 against ground-truth relevant guideline sets. Given the curated 10-document corpus with multi-label relevance, MRR evaluates top-1 precision while Recall@3 and NDCG@3 quantify retrieval coverage.
 
-\subsection{Statistical Analysis}
-All base models and stacking meta-learners are evaluated via 5-fold stratified cross-validation, preserving the 14.29\% $M_1$ prevalence and ensuring no patient appears in both training and validation folds; SMOTE is applied only to the training fold per iteration. Paired empirical bootstrap (2,000 iterations) provides all AUROC CIs and fusion-versus-best-modality significance tests by resampling identical patient splits with replacement. The DeLong test is reported for methodological comparison with the paired bootstrap, recognizing that DeLong's asymptotic assumptions may be under-supported in small-positive cohorts ($N_{\text{pos}} = 18$). Decision curve analysis computes net benefit as $\text{NB}(p_t) = \frac{\text{TP}}{N} - \frac{\text{FP}}{N} \cdot \frac{p_t}{1 - p_t}$ across $p_t \in [0.01, 0.50]$. Expected and Maximum Calibration Error are computed across 8 probability bins. SHAP values are computed per base model to identify feature drivers: AJCC stage, tumor size, and histological grade cumulatively account for 84\% of clinical feature attribution; \textit{VHL}, \textit{PBRM1}, \textit{BAP1}, \textit{SETD2}, and \textit{KDM5C} dominate genomic attribution; and high-attenuation tumor heterogeneity ResNet50 features dominate imaging attribution. At $N = 150$ RAG queries, the paired bootstrap achieves 95.42\% statistical power ($\alpha = 0.05$, $d = 0.30$) with a minimum detectable effect size of $d = 0.2287$.
+\textbf{Generation Quality:} Evaluated using standardized metrics:
+\begin{itemize}
+    \item \textbf{Faithfulness:} Evaluates factual consistency by checking whether every clinical assertion in the LLM response is grounded in the retrieved context passages.
+    \item \textbf{Clinical Relevance:} Evaluates whether the generated response directly addresses the ccRCC staging and risk queries with domain terminology coverage.
+    \item \textbf{Composite RAGAS:} Harmonic mean of Faithfulness and Relevance: $\text{RAGAS} = 2 \cdot (\text{Faithful} \cdot \text{Relev}) / (\text{Faithful} + \text{Relev})$.
+    \item \textbf{Class-Stratified Clinical Correctness:} Evaluates whether the model's clinical staging and risk assessment correctly matches ground-truth patient status, stratified into $M_1$ sensitivity (metastatic queries, $n=18$) and $M_0$ specificity (non-metastatic queries, $n=108$).
+\end{itemize}
+
+\textbf{Probabilistic Calibration Quality:} Evaluated via Expected Calibration Error (ECE; 8 bins), Maximum Calibration Error (MCE), and Brier Score on fused retrieval confidence scores.
+
+\subsection{Statistical Significance Testing}
+All base models, fusion strategies, and RAG architectures were evaluated under 5-fold stratified out-of-fold cross-validation. Statistical significance was evaluated using 2,000 paired bootstrap resamples, computing empirical 95\% confidence intervals and two-sided $p$-values against the strongest single-modality baseline (M3) for Stage~I and against the Naive RAG baseline for Stage~II. Power analysis confirms 95.42\% statistical power ($\alpha = 0.05$, $d = 0.30$) for detecting medium effect sizes at $N = 150$ queries.
