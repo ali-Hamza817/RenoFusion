@@ -184,51 +184,52 @@ print("[FIG] Saved fig4_calibration_hazard")
 # -------------------------------------------------------------
 # FIGURE 5: Comparative Performance Architecture Barplot
 # -------------------------------------------------------------
-fig, ax = plt.subplots(figsize=(10, 5))
+fig, ax = plt.subplots(figsize=(11.0, 6.0), dpi=300)
 names = [
-    'M2v2 (Genomic)', 'M3v2 (3D Rad)', 'Fusion G (Inter)', 'Fusion F (GBDT)',
-    'Fusion D (MLP)', 'Fusion A (Mean)', 'Fusion C (Logit)', 'Fusion B (Rank)',
-    'M1v2 (Clinical)', 'Fusion E (BEF)'
+    'M2v2 (Genomic)', 'Fusion G (Inter Concatenation)', 'M3v2 (3D Radiomics)', 'Fusion F (GBDT Stacking)',
+    'Fusion D (Bottleneck MLP)', 'Fusion A (Late Mean)', 'Fusion C (Logit Stacking)', 'Fusion B (Rank Average)',
+    'M1v2 (Clinical TNM)', 'Fusion E: Bayesian Evidential (BEF)'
 ]
-aurocs = [manifest[n if 'M3' not in n and 'Fusion G' not in n else ('M3v2 (3D Radiomics)' if 'M3' in n else 'Fusion G: Intermediate Representation')]['auroc'] for n in [
-    'M2v2 (Genomic)', 'M3v2 (3D Radiomics)', 'Fusion G: Intermediate Representation',
+keys = [
+    'M2v2 (Genomic)', 'Fusion G: Intermediate Representation', 'M3v2 (3D Radiomics)',
     'Fusion F: GBDT Stacking', 'Fusion D: Bottleneck MLP', 'Fusion A: Late Mean',
     'Fusion C: Logit Stacking', 'Fusion B: Rank Average', 'M1v2 (Clinical)', 'Fusion E: Bayesian Evidential (BEF)'
-]]
-ci_lows = [manifest[n]['auroc_ci_low'] for n in [
-    'M2v2 (Genomic)', 'M3v2 (3D Radiomics)', 'Fusion G: Intermediate Representation',
-    'Fusion F: GBDT Stacking', 'Fusion D: Bottleneck MLP', 'Fusion A: Late Mean',
-    'Fusion C: Logit Stacking', 'Fusion B: Rank Average', 'M1v2 (Clinical)', 'Fusion E: Bayesian Evidential (BEF)'
-]]
-ci_highs = [manifest[n]['auroc_ci_high'] for n in [
-    'M2v2 (Genomic)', 'M3v2 (3D Radiomics)', 'Fusion G: Intermediate Representation',
-    'Fusion F: GBDT Stacking', 'Fusion D: Bottleneck MLP', 'Fusion A: Late Mean',
-    'Fusion C: Logit Stacking', 'Fusion B: Rank Average', 'M1v2 (Clinical)', 'Fusion E: Bayesian Evidential (BEF)'
-]]
+]
+
+sorted_indices = np.argsort([manifest[k]['auroc'] for k in keys])
+names = [names[i] for i in sorted_indices]
+keys = [keys[i] for i in sorted_indices]
+
+aurocs = [manifest[k]['auroc'] for k in keys]
+ci_lows = [manifest[k]['auroc_ci_low'] for k in keys]
+ci_highs = [manifest[k]['auroc_ci_high'] for k in keys]
 
 y_pos = np.arange(len(names))
 err_low = np.array(aurocs) - np.array(ci_lows)
 err_high = np.array(ci_highs) - np.array(aurocs)
 
-bar_colors = ['#aec7e8', '#aec7e8', '#98df8a', '#98df8a', '#98df8a', '#98df8a', '#98df8a', '#98df8a', '#aec7e8', '#d62728']
-bars = ax.barh(y_pos, aurocs, xerr=[err_low, err_high], color=bar_colors, capsize=4, alpha=0.85, edgecolor='k', linewidth=0.8)
+bar_colors = ['#c6dbef', '#bcbddc', '#9ecae1', '#bcbddc', '#a1d99b', '#74c476', '#41ab5d', '#238b45', '#4292c6', '#de2d26']
+bars = ax.barh(y_pos, aurocs, xerr=[err_low, err_high], height=0.62,
+               color=bar_colors,
+               error_kw={'ecolor': '#222222', 'elinewidth': 1.3, 'capsize': 4, 'capthick': 1.3},
+               alpha=0.92, edgecolor='#1c1c1c', linewidth=0.8)
 
 ax.set_yticks(y_pos)
-ax.set_yticklabels(names)
-ax.set_xlim([0.45, 1.0])
-ax.axvline(0.84, color='red', linestyle='--', linewidth=1.5, label='SOTA Literature Benchmark (Xiao / Mahootiha: 0.840)')
-ax.set_xlabel('5-Fold Cross-Validation AUROC (with 95% Bootstrap CI)')
-ax.set_title('Architecture Comparison on ccRCC Metastasis Prediction')
-ax.legend(loc='lower right')
-ax.grid(True, axis='x', linestyle='--', alpha=0.4)
+ax.set_yticklabels(names, fontsize=10.5, fontweight='medium')
+ax.set_xlim([0.45, 1.05])
+ax.axvline(0.84, color='#d95f02', linestyle='--', linewidth=1.6, label='SOTA Literature Benchmark (Xiao et al. / Mahootiha et al.: 0.840)')
+ax.set_xlabel('5-Fold Cross-Validation AUROC (with 95% Bootstrap CI)', fontsize=11.5, labelpad=8)
+ax.set_title('Cross-Modal Architecture Comparison for ccRCC Metastasis Prediction', fontsize=13, pad=10, fontweight='bold')
+ax.legend(loc='lower right', frameon=True, facecolor='white', framealpha=0.95, fontsize=10)
+ax.grid(True, axis='x', linestyle='--', alpha=0.45)
 
-# Annotate values
-for bar, auroc in zip(bars, aurocs):
-    ax.text(auroc + 0.02, bar.get_y() + bar.get_height()/2, f"{auroc:.4f}", va='center', ha='left', fontsize=9.5, fontweight='bold')
+for i, (bar, auroc, ci_h) in enumerate(zip(bars, aurocs, ci_highs)):
+    ax.text(ci_h + 0.012, bar.get_y() + bar.get_height()/2, f'{auroc:.4f}',
+            va='center', ha='left', fontsize=9.5, fontweight='bold', color='#111111')
 
 plt.tight_layout()
-fig.savefig(FIGS_DIR / "fig5_architecture_comparison.pdf")
-fig.savefig(FIGS_DIR / "fig5_architecture_comparison.png")
+fig.savefig(FIGS_DIR / 'fig5_architecture_comparison.pdf')
+fig.savefig(FIGS_DIR / 'fig5_architecture_comparison.png')
 plt.close(fig)
 print("[FIG] Saved fig5_architecture_comparison")
 print("\nAll publication figures successfully updated!")
